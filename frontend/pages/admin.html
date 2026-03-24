@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<title>Administrador</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+
+body{
+background:#f5f7fa;
+}
+
+h1{
+margin-bottom:30px;
+font-weight:600;
+}
+
+.card{
+border:none;
+border-radius:12px;
+box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+table img{
+border-radius:6px;
+}
+
+thead{
+background:#212529;
+color:white;
+}
+
+button{
+border-radius:8px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container mt-4">
+
+<h1 class="text-center">⚙ Panel de Administrador</h1>
+
+<div class="text-center mb-4">
+<button class="btn btn-primary" onclick="cargarProductos()">Actualizar lista</button>
+</div>
+
+<!-- ===============================
+AGREGAR PRODUCTO
+=============================== -->
+
+<div class="card p-4 mb-4">
+
+<h4>Agregar Producto</h4>
+
+<div class="row g-3">
+
+<div class="col-md-3">
+<input class="form-control" id="nombre" placeholder="Nombre">
+</div>
+
+<div class="col-md-2">
+<input class="form-control" id="precio" placeholder="Precio">
+</div>
+
+<div class="col-md-2">
+<input class="form-control" id="stock" placeholder="Stock">
+</div>
+
+<div class="col-md-3">
+<input class="form-control" type="file" id="imagen">
+</div>
+
+<div class="col-md-2">
+<button class="btn btn-success w-100" onclick="agregarProducto()">Agregar</button>
+</div>
+
+</div>
+
+</div>
+
+<!-- ===============================
+PRODUCTOS
+=============================== -->
+
+<div class="card p-4 mb-4">
+
+<h4>Productos</h4>
+
+<div class="table-responsive">
+
+<table class="table table-striped align-middle">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Nombre</th>
+<th>Precio</th>
+<th>Stock</th>
+<th>Imagen</th>
+<th>Acciones</th>
+</tr>
+</thead>
+
+<tbody id="tablaProductos"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- ===============================
+HISTORIAL
+=============================== -->
+
+<div class="card p-4">
+
+<h4>Historial de Pedidos</h4>
+
+<div class="table-responsive">
+
+<table class="table table-striped align-middle">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Usuario</th>
+<th>Producto</th>
+<th>Cantidad</th>
+<th>Estado</th>
+<th>Acción</th>
+</tr>
+</thead>
+
+<tbody id="tablaHistorial"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+const API = "http://26.145.132.10:8000"
+
+/* ===============================
+PRODUCTOS
+=============================== */
+
+async function cargarProductos(){
+
+let res = await fetch(API + "/productos")
+let productos = await res.json()
+
+let tabla = document.getElementById("tablaProductos")
+tabla.innerHTML=""
+
+productos.forEach(p=>{
+
+tabla.innerHTML += `
+<tr>
+
+<td>${p.id}</td>
+
+<td>
+<input class="form-control mb-1" id="nombre-${p.id}" value="${p.nombre}">
+<button class="btn btn-sm btn-primary" onclick="cambiarNombre(${p.id})">Cambiar</button>
+</td>
+
+<td>
+<input class="form-control mb-1" id="precio-${p.id}" value="${p.precio}">
+<button class="btn btn-sm btn-primary" onclick="cambiarPrecio(${p.id})">Cambiar</button>
+</td>
+
+<td>
+<input class="form-control mb-1" id="stock-${p.id}" value="${p.stock}">
+<button class="btn btn-sm btn-primary" onclick="cambiarStock(${p.id})">Cambiar</button>
+</td>
+
+<td>
+<img src="http://26.145.132.10:8000/images/${p.imagen}" width="60"><br>
+<button class="btn btn-sm btn-secondary mt-1" onclick="cambiarImagen(${p.id})">Cambiar imagen</button>
+</td>
+
+<td>
+<button class="btn btn-sm btn-danger" onclick="eliminarProducto(${p.id})">Eliminar</button>
+</td>
+
+</tr>
+`
+})
+
+}
+
+async function cambiarStock(id){
+
+let stock = document.getElementById("stock-"+id).value
+
+await fetch(API+"/admin/stock",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+id:parseInt(id),
+stock:parseInt(stock)
+})
+})
+
+cargarProductos()
+
+}
+
+async function cambiarPrecio(id){
+
+let precio = document.getElementById("precio-"+id).value
+
+await fetch(API+"/admin/precio",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+id:parseInt(id),
+precio:parseInt(precio)
+})
+})
+
+cargarProductos()
+
+}
+
+async function cambiarNombre(id){
+
+let nombre = document.getElementById("nombre-"+id).value
+
+let formData = new FormData()
+
+formData.append("id",id)
+formData.append("nombre",nombre)
+
+await fetch(API+"/admin/cambiar_nombre",{
+method:"POST",
+body:formData
+})
+
+cargarProductos()
+
+}
+
+async function agregarProducto(){
+
+let nombre = document.getElementById("nombre").value
+let precio = document.getElementById("precio").value
+let stock = document.getElementById("stock").value
+let archivo = document.getElementById("imagen").files[0]
+
+let formData = new FormData()
+
+formData.append("nombre",nombre)
+formData.append("precio",precio)
+formData.append("stock",stock)
+formData.append("imagen",archivo)
+
+await fetch(API+"/admin/agregar",{
+method:"POST",
+body:formData
+})
+
+cargarProductos()
+
+}
+
+async function eliminarProducto(id){
+
+await fetch(API+"/admin/eliminar/"+id,{
+method:"DELETE"
+})
+
+cargarProductos()
+
+}
+
+function cambiarImagen(id){
+
+let input = document.createElement("input")
+input.type = "file"
+input.accept = "image/*"
+
+input.onchange = async function(){
+
+let archivo = input.files[0]
+
+let formData = new FormData()
+formData.append("id",id)
+formData.append("imagen",archivo)
+
+await fetch(API+"/admin/cambiar_imagen",{
+method:"POST",
+body:formData
+})
+
+cargarProductos()
+
+}
+
+input.click()
+
+}
+
+/* ===============================
+HISTORIAL ADMIN
+=============================== */
+
+async function cargarHistorial(){
+
+let res = await fetch(API + "/admin/historial")
+let data = await res.json()
+
+let tabla = document.getElementById("tablaHistorial")
+tabla.innerHTML=""
+
+data.forEach(p=>{
+
+tabla.innerHTML += `
+<tr>
+
+<td>${p.id}</td>
+<td>${p.usuario}</td>
+<td>${p.producto}</td>
+<td>${p.cantidad}</td>
+<td>${p.estado}</td>
+
+<td>
+
+<button class="btn btn-sm btn-success"
+onclick="cambiarEstado(${p.id},'entregado')">
+Entregado
+</button>
+
+<button class="btn btn-sm btn-warning"
+onclick="cambiarEstado(${p.id},'pendiente')">
+Pendiente
+</button>
+
+</td>
+
+</tr>
+`
+
+})
+
+}
+
+async function cambiarEstado(id,estado){
+
+await fetch(API + "/admin/cambiar_estado",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+id:id,
+estado:estado
+})
+
+})
+
+cargarHistorial()
+
+}
+
+/* ===============================
+AUTO CARGA
+=============================== */
+
+cargarProductos()
+cargarHistorial()
+
+setInterval(()=>{
+
+cargarProductos()
+cargarHistorial()
+
+},10000)
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pago;
+
+service PagoService {
+  rpc ProcesarPago (PagoRequest) returns (PagoResponse);
+}
+
+message PagoRequest {
+  float total = 1;
+  string tarjeta = 2;
+  string nip = 3;
+}
+
+message PagoResponse {
+  bool aprobado = 1;
+  string mensaje = 2;
+}

@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package carrito;
+
+service CarritoService {
+
+  rpc ListarProductos (Empty) returns (ListaProductos);
+
+  rpc Comprar (CompraRequest) returns (CompraResponse);
+}
+
+message Empty {}
+
+message Producto {
+  int32 id = 1;
+  string nombre = 2;
+  float precio = 3;
+  int32 stock = 4;
+  string imagen = 5;
+}
+
+message ListaProductos {
+  repeated Producto productos = 1;
+}
+
+message CompraRequest {
+  int32 producto_id = 1;
+  int32 cantidad = 2;
+  string tarjeta = 3;
+  string nip = 4;
+}
+
+message CompraResponse {
+  bool exito = 1;
+  string mensaje = 2;
+}

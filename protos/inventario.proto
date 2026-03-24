@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package inventario;
+
+service InventarioService {
+
+  rpc ListarProductos (Empty) returns (ListaProductos);
+  rpc VerificarStock (ProductoRequest) returns (StockResponse);
+  rpc DescontarStock (ProductoRequest) returns (StockResponse);
+
+  // ADMIN
+  rpc ActualizarStock (ActualizarStockRequest) returns (Producto);
+  rpc ActualizarPrecio (ActualizarPrecioRequest) returns (Producto);
+  rpc AgregarProducto (NuevoProducto) returns (Producto);
+  rpc EliminarProducto (EliminarProductoRequest) returns (Empty);
+  rpc ActualizarNombre (ActualizarNombreRequest) returns (Producto);
+  rpc ActualizarImagen (ActualizarImagenRequest) returns (Producto);
+}
+
+message Empty {}
+
+message Producto {
+  int32 id = 1;
+  string nombre = 2;
+  float precio = 3;
+  int32 stock = 4;
+  string imagen = 5;
+}
+
+message ListaProductos {
+  repeated Producto productos = 1;
+}
+
+message ProductoRequest {
+  int32 id = 1;
+  int32 cantidad = 2;
+}
+
+message StockResponse {
+  int32 stock = 1;
+  float precio = 2;
+}
+
+message ActualizarStockRequest {
+  int32 id = 1;
+  int32 stock = 2;
+}
+
+message ActualizarPrecioRequest {
+  int32 id = 1;
+  float precio = 2;
+}
+
+message NuevoProducto {
+  string nombre = 1;
+  float precio = 2;
+  int32 stock = 3;
+  string imagen = 4;
+}
+
+message EliminarProductoRequest {
+  int32 id = 1;
+}
+
+message ActualizarNombreRequest {
+  int32 id = 1;
+  string nombre = 2;
+}
+
+message ActualizarImagenRequest {
+  int32 id = 1;
+  string imagen = 2;
+}
