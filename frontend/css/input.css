@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.topping-img {
+    @apply w-40 h-40 mx-4 rounded-full object-scale-down bg-[#5ee1e6] p-4;
+}

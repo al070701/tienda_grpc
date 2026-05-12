@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RELLENITOS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=DynaPuff:wght@400..700&family=Viga&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <link href="../css/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css" />
+
+    <style>
+        .font-cherry { font-family: 'Cherry Bomb One', cursive; }
+        .font-viga { font-family: 'Viga', sans-serif; }   
+        .font-dynapuff { font-family: 'DynaPuff', cursive; }
+        .highlight-word { color: #d26ae6; }
+        .text-justify { text-align: justify; text-align-last: justify; }
+
+    </style>
+
+</head>
+<body>
+    <header class="bg-[#5ee1e6] text-white p-8">
+        <nav class="flex justify-end h-14">
+            <ul class="flex space-x-10 text-xl font-viga font-extrabold pt-4">
+                <li class=" hover:text-[#b825d4]">HOGAR</li>
+                <li class=" hover:text-[#b825d4]">PRODUCTO</li>
+                <li class=" hover:text-[#b825d4]">ACERCA DE</li>
+                <li class=" hover:text-[#b825d4]">CONTACTO</li>
+                <li>
+                    <svg class="hover:text-[#E6B86E]" width="21" height="21" fill="currentColor">
+                        <use href="../assets/sprite.svg#buscador" xlink:href="../assets/sprite.svg#buscador" />
+                    </svg>
+                </li>
+                
+                <li>
+                    <svg class="hover:text-[#E6B86E]" width="21" height="21" fill="currentColor">
+                        <use href="../assets/sprite.svg#carrito" xlink:href="../assets/sprite.svg#carrito" />
+                    </svg>
+                </li>
+                <li>
+                    <svg class="hover:text-[#aba9a7]" width="21" height="21" fill="currentColor">
+                        <use href="../assets/sprite.svg#usuario" xlink:href="../assets/sprite.svg#usuario" />
+                    </svg>
+                </li>
+
+            </ul>
+        </nav>
+
+    </header>
+
+    <main>
+        <section class=" bg-[#fcd3fe] text-white p-12 h-[530px]">
+            <div class="flex">
+                <div class="w-1/2">
+                    <h1 class="text-[#5ee1e6] font-cherry text-6xl pb-5 pt-9 text-justify">¡TAIYAKIS <span class="highlight-word">RELLENITOS</span> <br>DE PURO SABOOOOOR!</h1>
+                    <p class="font-viga text-2xl text-justify pb-6 font-light">Prueba todas las variedades de taiyakis con helado  y rellenos deliciosos que tenemos para ti. Podrás encontrar opciones para todos los gustos: Desde taiyakis clásicos con relleno de oreo hasta taiyakis más modernos rellenos de jarabe de matcha</p>
+                    <button  class="block mx-auto bg-[#d26ae6] text-white text-3xl px-6 py-3 rounded-lg font-bold font-viga hover:bg-[#b825d4]">¡ORDENA AHORA!</button> 
+                </div>
+
+                <div class="w-1/2 flex justify-center items-center">
+                    <img class="h-[450px] object-contain" src="../assets/taiyaki principal.png" alt="Taiyakis">
+                </div>
+            </div>
+        </section>
+
+        <section class="min-h-screen pt-14">
+            <h1 class="text-[#5ee1e6] font-dynapuff text-3xl font-semibold text-center pb-6">¡Elige entre todos nuestros nuevos sabores que deseguro te fascinarán!</h1>
+
+            <div class="swiper mySwiper py-6" >
+                <div class="swiper-wrapper font-viga font-normal text-center"> 
+
+                    <div class="swiper-slide slide-card" >
+                        <h2 class="text-2xl font-semibold pb-4 text-center text-[#d26ae6] font-dynapuff">Taiyaki sabor matcha</h2>
+                        <div class="h-44 mb-4 rounded-3xl bg-white/10 flex items-center justify-center text-sm uppercase tracking-wide"><img src="../assets/matcha.png" alt=""></div>
+                        <p class="text-base leading-7">Taiyaki con helado mitad vainilla, mitad matcha y relleno de jarabe sabor matcha.</p>
+                        <button class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold hover:bg-[#23cbd1] py-3">¡ORDENA AHORA!</button>
+                    </div>
+
+                    <div class="swiper-slide slide-card">
+                        <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Taiyaki sabor frambuesa</h2>
+                        <div class="h-44 mb-4 rounded-3xl bg-white/10 flex items-center justify-center text-sm uppercase tracking-wide"><img width="105" src="../assets/frambuesa.png" alt=""></div>
+                        <p class="text-base leading-7 mb-6 ">Taiyaki con helado mitad vainilla, mitad frambuesa y relleno de jarabe sabor frambuesa.</p>
+                        <button class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]">¡ORDENA AHORA!</button>
+                    </div>
+
+                    <div class="swiper-slide slide-card">
+                        <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Taiyaki sabor piña colada</h2>
+                        <div class="h-44 mb-4 rounded-3xl bg-white/10 flex items-center justify-center text-sm uppercase tracking-wide"><img width="360" src="../assets/pina.png" alt=""></div>
+                        <p class="text-base leading-7 mb-6">Taiyaki con helado de piña y relleno de una mezcla sabor piña con licor y coco.</p>
+                        <button class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]">¡ORDENA AHORA!</button>
+                    </div>
+
+                    <div class="swiper-slide slide-card">
+                        <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Taiyaki sabor chocolate de dubai</h2>
+                        <div class="h-44 mb-4 rounded-3xl bg-white/10 flex items-center justify-center text-sm uppercase tracking-wide"><img width="95" src="../assets/dubai.png" alt=""></div>
+                        <p class="text-base leading-7 mb-6">Taiyaki con helado de pistacho y relleno de una mezcla de chocolate de dubai con almendras.</p>
+                        <button class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]"   >¡ORDENA AHORA!</button>
+                    </div>
+
+                </div>
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-prev text-[#d26ae6] text-2xl font-bold">‹</div>
+                <div class="swiper-button-next text-[#d26ae6] text-2xl font-bold">›</div>
+            </div>
+        </section>
+
+        <section class="h-[300px] pt-6 pb-6">
+            <h1 class="text-[#d26ae6] text-3xl font-semibold font-dynapuff text-center mb-6 pt-12"> ¡Complementa tu orden con toda esta variedad de toppings! </h1>
+            
+            <div class="overflow-hidden">
+                <div class="flex w-max animate-marquee">
+                    <div class="flex">
+                        <img class="topping-img" src="../assets/oreo.png">
+                        <img class="topping-img" src="../assets/malvaviscos.png">
+                        <img class="topping-img" src="../assets/barrachoco.png">
+                        <img class="topping-img" src="../assets/chispitas.png">
+                        <img class="topping-img" src="../assets/mandm.png">
+                        <img class="topping-img" src="../assets/chispaschoco.png">
+                        <img class="topping-img" src="../assets/almendras.png">
+                        <img class="topping-img" src="../assets/nueces.png">
+                        <img class="topping-img" src="../assets/pretzels.png">
+                        <img class="topping-img" src="../assets/frutos.png">
+                        <img class="topping-img" src="../assets/arandanos.png">
+                        <img class="topping-img" src="../assets/fresas.png">
+                        <img class="topping-img" src="../assets/platano.png">
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <section class="h-[500px] pt-14">
+                <h1 class="text-[#5ee1e6] text-3xl font-semibold font-dynapuff text-center">¡Prueba nuestro nuevo producto!</h1>
+                
+        </section>
+
+    </main>
+
+    <footer>
+
+    </footer>
+
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script src="../js/main.js"></script>
+
+</body>
+</html>
