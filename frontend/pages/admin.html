@@ -73,6 +73,14 @@ AGREGAR PRODUCTO
 <input class="form-control" id="stock" placeholder="Stock">
 </div>
 
+<div class="col-md-2">
+<input class="form-control" id="categoria" placeholder="Categoria">
+</div>
+
+<div class="col-md-4">
+<input class="form-control" id="descripcion" placeholder="Descripcion">
+</div>
+
 <div class="col-md-3">
 <input class="form-control" type="file" id="imagen">
 </div>
@@ -260,6 +268,8 @@ async function agregarProducto(){
 let nombre = document.getElementById("nombre").value
 let precio = document.getElementById("precio").value
 let stock = document.getElementById("stock").value
+let categoria = document.getElementById("categoria").value
+let descripcion = document.getElementById("descripcion").value
 let archivo = document.getElementById("imagen").files[0]
 
 let formData = new FormData()
@@ -267,6 +277,8 @@ let formData = new FormData()
 formData.append("nombre",nombre)
 formData.append("precio",precio)
 formData.append("stock",stock)
+formData.append("categoria",categoria)
+formData.append("descripcion",descripcion)
 formData.append("imagen",archivo)
 
 await fetch(API+"/admin/agregar",{

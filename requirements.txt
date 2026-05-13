@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+grpcio
+grpcio-tools
+protobuf
+pydantic
+python-multipart
+pymongo
+python-dotenv
+certifi
+dnspython

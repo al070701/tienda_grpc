@@ -1,83 +1,135 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RELLENITOS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=DynaPuff:wght@400..700&family=Viga&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <link href="../css/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css" />
 
-<meta charset="UTF-8">
-<title>Tienda</title>
+    <style>
+        .font-cherry { font-family: 'Cherry Bomb One', cursive; }
+        .font-viga { font-family: 'Viga', sans-serif; }   
+        .font-dynapuff { font-family: 'DynaPuff', cursive; }
+        .highlight-word { color: #d26ae6; }
+        .text-justify { text-align: justify; text-align-last: justify; }
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<link rel="stylesheet" href="../css/styles.css">
-
-<style>
-.card img{
-height:200px;
-object-fit:cover;
-}
-</style>
+    </style>
 
 </head>
 
 <body>
+    <header class="bg-[#5ee1e6] text-white p-8">
+        <nav class="flex justify-end h-14">
+            <ul class="flex space-x-10 text-xl font-viga font-extrabold pt-4">
+                <li class=" hover:text-[#b825d4]" onclick="irInicio();">HOGAR</li>
+                <li class=" hover:text-[#b825d4]" onclick="irProductos();">PRODUCTO</li>
+                <li class=" hover:text-[#b825d4]" onclick="irAcerca();">ACERCA DE</li>
+                <li class=" hover:text-[#b825d4]" onclick="irContacto();">CONTACTO</li>
+                <li>
+                    <svg class="hover:text-[#E6B86E]" width="21" height="21" fill="currentColor">
+                        <use href="../assets/sprite.svg#buscador" xlink:href="../assets/sprite.svg#buscador" />
+                    </svg>
+                </li>
+                
+                <li>
+                    <svg class="hover:text-[#E6B86E]" width="21" height="21" fill="currentColor" onclick="abrirCarrito();">
+                        <use href="../assets/sprite.svg#carrito" xlink:href="../assets/sprite.svg#carrito" />
+                    </svg>
+                </li>
+                <li>
+                    <svg class="hover:text-[#aba9a7]" width="21" height="21" fill="currentColor" onclick="irPerfil();">
+                        <use href="../assets/sprite.svg#usuario" xlink:href="../assets/sprite.svg#usuario" />
+                    </svg>
+                </li>
 
-<nav class="navbar navbar-dark bg-dark px-4">
+            </ul>
+        </nav>
+    </header>
 
-<span class="navbar-brand">🛍 Tienda gRPC</span>
+    <main>
+        
+        <div class="flex gap-4 p-4">
+            <select id="categoria" onchange="aplicarFiltros()" class="p-2 rounded border">
+                <option value="todos">Todos</option>
+                <option value="taiyakis">Taiyakis</option>
+                <option value="gomitas">Gomitas</option>
+            </select>
 
-<div>
-<button class="btn btn-outline-light me-2" onclick="irCarrito()">🛒</button>
-<button class="btn btn-outline-light me-2" onclick="irHistorial()">🧾</button>
-<button class="btn btn-outline-light" onclick="logout()">Salir</button>
+            <select id="orden" onchange="aplicarFiltros()" class="p-2 rounded border">
+                <option value="">Ordenar</option>
+                <option value="az">Nombre A - Z</option>
+                <option value="za">Nombre Z - A</option>
+                <option value="precioAsc">Precio menor a mayor</option>
+                <option value="precioDesc">Precio mayor a menor</option>
+                <option value="nuevos">Más nuevos</option>
+            </select>
+        </div>
+
+        <div id="productos-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-8"></div>
+
+        <!-- OVERLAY -->
+<div id="overlay-carrito"
+class="fixed inset-0 bg-black/40 hidden z-40"
+onclick="cerrarCarrito()">
 </div>
 
-</nav>
+<!-- SIDEBAR CARRITO -->
+<div id="sidebar-carrito"
+class="fixed top-0 right-[-500px] w-[400px] h-full bg-white shadow-2xl z-50 transition-all duration-300 flex flex-col">
 
+    <!-- HEADER -->
+    <div class="p-4 border-b flex justify-between items-center">
 
-<div class="container mt-4">
+        <h2 id="titulo-carrito" class="text-2xl font-bold text-cyan-400">
+            Carrito
+        </h2>
 
-<div class="row" id="productos-container"></div>
+        <button
+        onclick="cerrarCarrito()"
+        class="text-2xl font-bold">
+            ✕
+        </button>
+
+    </div>
+
+    <!-- PRODUCTOS -->
+    <div
+    id="carrito-container"
+    class="flex-1 overflow-y-auto p-4 space-y-4">
+    </div>
+
+    <!-- FOOTER -->
+    <div class="border-t p-4">
+
+        <div class="flex justify-between text-xl font-bold mb-4">
+            <span>Total:</span>
+            <span>$<span id="total">0</span></span>
+        </div>
+
+        <button
+        onclick="mostrarPago()"
+        class="w-full bg-cyan-400 text-white py-3 rounded-xl font-bold">
+            Comprar
+        </button>
+
+    </div>
 
 </div>
 
-
-<!-- MODAL VER MÁS -->
-
-<div class="modal fade" id="modalProducto" tabindex="-1">
-
-<div class="modal-dialog">
-
-<div class="modal-content">
-
-<div class="modal-header">
-
-<h5 class="modal-title" id="modalTitulo"></h5>
-
-<button class="btn-close" data-bs-dismiss="modal"></button>
-
-</div>
-
-<div class="modal-body text-center">
-
-<img id="modalImagen" class="img-fluid mb-3">
-
-<p id="modalPrecio"></p>
-
-<p>Producto disponible en nuestra tienda.</p>
-
-</div>
-
-</div>
-</div>
-</div>
+    </main>
 
 
+    <footer></footer>
 <!-- LIBRERÍAS JS -->
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script src="../js/app.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script  type="module" src="../js/app.js"></script>
 
 </body>
 </html>

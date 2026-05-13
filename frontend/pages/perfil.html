@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mi Perfil</title>
+
+<link href="../css/output.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+body{
+    background:#f8fafc;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <aside class="w-72 bg-white shadow-xl p-6">
+
+        <h1 class="text-3xl font-bold text-cyan-400 mb-10">
+            Mi Cuenta
+        </h1>
+
+        <nav class="space-y-3">
+
+            <button onclick="mostrarSeccion('cuenta')"
+            class="w-full text-left p-3 rounded-xl hover:bg-cyan-50">
+                👤 Cuenta
+            </button>
+
+            <button onclick="mostrarSeccion('pedidos')"
+            class="w-full text-left p-3 rounded-xl hover:bg-cyan-50">
+                📦 Pedidos
+            </button>
+
+            <button onclick="mostrarSeccion('seguridad')"
+            class="w-full text-left p-3 rounded-xl hover:bg-cyan-50">
+                🔒 Seguridad
+            </button>
+
+            <button onclick="logout()"
+            class="w-full text-left p-3 rounded-xl bg-red-500 text-white hover:bg-red-600">
+                🚪 Cerrar sesión
+            </button>
+
+        </nav>
+
+    </aside>
+
+    <!-- CONTENIDO -->
+    <main class="flex-1 p-10">
+        <div class="flex justify-end mb-6">
+            <button onclick="volverInicio()" class="w-12 h-12 rounded-full bg-white shadow-md text-2xl hover:bg-red-500 hover:text-white transition">
+                ✕
+            </button>
+        </div>
+
+        <!-- CUENTA -->
+        <section id="cuenta">
+
+            <h2 class="text-4xl font-bold mb-8">
+                Información de cuenta
+            </h2>
+
+            <div class="bg-white rounded-3xl shadow-md p-8 max-w-2xl">
+
+                <div class="mb-6">
+                    <label class="block mb-2 font-bold">
+                        Correo
+                    </label>
+
+                    <input
+                    id="correo"
+                    disabled
+                    class="w-full border rounded-xl p-3 bg-gray-100">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block mb-2 font-bold">
+                        Nombre de usuario
+                    </label>
+
+                    <input
+                    id="nombre"
+                    class="w-full border rounded-xl p-3">
+                </div>
+
+                <button
+                onclick="guardarNombre()"
+                class="bg-cyan-400 text-white px-6 py-3 rounded-xl">
+                    Guardar cambios
+                </button>
+
+            </div>
+
+        </section>
+
+        <!-- PEDIDOS -->
+        <section id="pedidos" class="hidden">
+
+            <h2 class="text-4xl font-bold mb-8">
+                Mis pedidos
+            </h2>
+
+            <div id="lista-pedidos"
+            class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            </div>
+
+        </section>
+
+        <!-- SEGURIDAD -->
+        <section id="seguridad" class="hidden">
+
+            <h2 class="text-4xl font-bold mb-8">
+                Seguridad
+            </h2>
+
+            <div class="bg-white rounded-3xl shadow-md p-8 max-w-2xl">
+
+                <input
+                id="actual"
+                type="password"
+                placeholder="Contraseña actual"
+                class="w-full border rounded-xl p-3 mb-4">
+
+                <input
+                id="nueva"
+                type="password"
+                placeholder="Nueva contraseña"
+                class="w-full border rounded-xl p-3 mb-6">
+
+                <button
+                onclick="cambiarPassword()"
+                class="bg-cyan-400 text-white px-6 py-3 rounded-xl">
+                    Cambiar contraseña
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script type="module" src="../js/perfil.js"></script>
+
+</body>
+</html>

@@ -79,6 +79,16 @@ class InventarioServiceStub(object):
                 request_serializer=inventario__pb2.ActualizarImagenRequest.SerializeToString,
                 response_deserializer=inventario__pb2.Producto.FromString,
                 _registered_method=True)
+        self.ActualizarCategoria = channel.unary_unary(
+                '/inventario.InventarioService/ActualizarCategoria',
+                request_serializer=inventario__pb2.ActualizarCategoriaRequest.SerializeToString,
+                response_deserializer=inventario__pb2.Producto.FromString,
+                _registered_method=True)
+        self.ActualizarDescripcion = channel.unary_unary(
+                '/inventario.InventarioService/ActualizarDescripcion',
+                request_serializer=inventario__pb2.ActualizarDescripcionRequest.SerializeToString,
+                response_deserializer=inventario__pb2.Producto.FromString,
+                _registered_method=True)
 
 
 class InventarioServiceServicer(object):
@@ -139,6 +149,18 @@ class InventarioServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ActualizarCategoria(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ActualizarDescripcion(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_InventarioServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -185,6 +207,16 @@ def add_InventarioServiceServicer_to_server(servicer, server):
             'ActualizarImagen': grpc.unary_unary_rpc_method_handler(
                     servicer.ActualizarImagen,
                     request_deserializer=inventario__pb2.ActualizarImagenRequest.FromString,
+                    response_serializer=inventario__pb2.Producto.SerializeToString,
+            ),
+            'ActualizarCategoria': grpc.unary_unary_rpc_method_handler(
+                    servicer.ActualizarCategoria,
+                    request_deserializer=inventario__pb2.ActualizarCategoriaRequest.FromString,
+                    response_serializer=inventario__pb2.Producto.SerializeToString,
+            ),
+            'ActualizarDescripcion': grpc.unary_unary_rpc_method_handler(
+                    servicer.ActualizarDescripcion,
+                    request_deserializer=inventario__pb2.ActualizarDescripcionRequest.FromString,
                     response_serializer=inventario__pb2.Producto.SerializeToString,
             ),
     }
@@ -430,6 +462,60 @@ class InventarioService(object):
             target,
             '/inventario.InventarioService/ActualizarImagen',
             inventario__pb2.ActualizarImagenRequest.SerializeToString,
+            inventario__pb2.Producto.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ActualizarCategoria(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/inventario.InventarioService/ActualizarCategoria',
+            inventario__pb2.ActualizarCategoriaRequest.SerializeToString,
+            inventario__pb2.Producto.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ActualizarDescripcion(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/inventario.InventarioService/ActualizarDescripcion',
+            inventario__pb2.ActualizarDescripcionRequest.SerializeToString,
             inventario__pb2.Producto.FromString,
             options,
             channel_credentials,

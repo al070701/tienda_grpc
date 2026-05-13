@@ -15,7 +15,7 @@ class CarritoService(carrito_pb2_grpc.CarritoServiceServicer):
     # ===============================
     def ListarProductos(self, request, context):
         try:
-            canal_inventario = grpc.insecure_channel('26.145.132.10:50051')
+            canal_inventario = grpc.insecure_channel('inventario:50051')
             stub_inventario = inventario_pb2_grpc.InventarioServiceStub(canal_inventario)
 
             respuesta = stub_inventario.ListarProductos(
@@ -30,8 +30,10 @@ class CarritoService(carrito_pb2_grpc.CarritoServiceServicer):
                         id=p.id,
                         nombre=p.nombre,
                         precio=p.precio,
-                        stock=p.stock,
-                        imagen=p.imagen
+                        imagen=p.imagen,
+                        stock=getattr(p, "stock", 0),
+                        categoria=getattr(p, "categoria", "todos"),
+                        descripcion=getattr(p, "descripcion", "")
                         
                     )
                 )
@@ -51,7 +53,7 @@ class CarritoService(carrito_pb2_grpc.CarritoServiceServicer):
 
         try:
             # 🔹 Conectar con Inventario
-            canal_inventario = grpc.insecure_channel('26.145.132.10:50051')
+            canal_inventario = grpc.insecure_channel('inventario:50051')
             stub_inventario = inventario_pb2_grpc.InventarioServiceStub(canal_inventario)
 
             # 1️⃣ Verificar stock (NO descuenta)
@@ -71,7 +73,7 @@ class CarritoService(carrito_pb2_grpc.CarritoServiceServicer):
             total = respuesta_inv.precio * request.cantidad
 
             # 🔹 Conectar con Pago
-            canal_pago = grpc.insecure_channel('26.145.132.10:50053')
+            canal_pago = grpc.insecure_channel('pago:50053')
             stub_pago = pago_pb2_grpc.PagoServiceStub(canal_pago)
 
             # 2️⃣ Procesar pago

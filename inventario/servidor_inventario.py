@@ -1,31 +1,12 @@
-from urllib import request
-
 import grpc
 from concurrent import futures
 
 import inventario_pb2
 import inventario_pb2_grpc
 from threading import Lock
+from basedatos.db import productos_collection
 
 lock = Lock()
-
-# ===============================
-# PRODUCTOS EN MEMORIA
-# ===============================
-productos = {
-    1: {"nombre": "Laptop", "precio": 10000, "stock": 5, "imagen": "laptop.jpg"},
-    2: {"nombre": "Mouse", "precio": 300, "stock": 10, "imagen": "mouse.jpg"},
-    3: {"nombre": "Teclado", "precio": 300, "stock": 16, "imagen": "teclado.jpg"},
-    4: {"nombre": "Audifonos", "precio": 300, "stock": 30, "imagen": "audifonos.jpg"},
-    5: {"nombre": "Adaptador usb", "precio": 300, "stock": 10, "imagen": "adaptador_usb.jpg"},
-    6: {"nombre": "Memoria usb", "precio": 300, "stock": 10, "imagen": "memoria_usb.jpg"},
-    7: {"nombre": "Bocinas", "precio": 300, "stock": 70, "imagen": "bocinas.jpg"},
-    8: {"nombre": "CableHDMI", "precio": 300, "stock": 10, "imagen": "cable_hdmi.jpg"},
-    9: {"nombre": "Disco duro", "precio": 300, "stock": 150, "imagen": "disco_duro.jpg"},
-    10: {"nombre": "Memoria RAM", "precio": 300, "stock": 10, "imagen": "ram.jpg"},
-    11: {"nombre": "Pantalla", "precio": 3000, "stock": 100, "imagen": "pantalla.jpg"}
-}
-
 
 class InventarioService(inventario_pb2_grpc.InventarioServiceServicer):
 
@@ -36,17 +17,18 @@ class InventarioService(inventario_pb2_grpc.InventarioServiceServicer):
 
         lista_productos = []
 
-        for id, data in productos.items():
-
-            producto = inventario_pb2.Producto(
-                id=id,
-                nombre=data["nombre"],
-                precio=data["precio"],
-                stock=data["stock"],
-                imagen=data["imagen"]
+        for producto in productos_collection.find():
+            producto_pb2 = inventario_pb2.Producto(
+                id=int(producto.get("_id", 0)),
+            nombre=str(producto.get("nombre", "")),
+            precio=float(producto.get("precio", 0)),
+            stock=int(producto.get("stock", 0)),
+            imagen=str(producto.get("imagen", "")),
+            categoria=str(producto.get("categoria", "todos")),
+            descripcion=str(producto.get("descripcion", ""))
             )
 
-            lista_productos.append(producto)
+            lista_productos.append(producto_pb2)
 
         return inventario_pb2.ListaProductos(productos=lista_productos)
 
@@ -56,7 +38,7 @@ class InventarioService(inventario_pb2_grpc.InventarioServiceServicer):
     # ===============================
     def VerificarStock(self, request, context):
 
-        producto = productos.get(request.id)
+        producto = productos_collection.find_one({"_id": request.id})
 
         if not producto:
             return inventario_pb2.StockResponse(
@@ -69,18 +51,22 @@ class InventarioService(inventario_pb2_grpc.InventarioServiceServicer):
             precio=producto["precio"]
         )
 
-
     # ===============================
     # DESCONTAR STOCK (CONCURRENCIA)
     # ===============================
     def DescontarStock(self, request, context):
-
+        
         with lock:
-
-            producto = productos.get(request.id)
+            
+            producto = productos_collection.find_one({
+                "_id": request.id
+            })
 
             if not producto:
-                context.abort(grpc.StatusCode.NOT_FOUND, "Producto no encontrado")
+                context.abort(
+                    grpc.StatusCode.NOT_FOUND,
+                    "Producto no encontrado"
+                )
 
             if producto["stock"] < request.cantidad:
 
@@ -89,32 +75,52 @@ class InventarioService(inventario_pb2_grpc.InventarioServiceServicer):
                     precio=producto["precio"]
                 )
 
-            producto["stock"] -= request.cantidad
+            nuevo_stock = producto["stock"] - request.cantidad
 
-            return inventario_pb2.StockResponse(
-                stock=producto["stock"],
-                precio=producto["precio"]
+            productos_collection.update_one(
+                {"_id": request.id},
+                {
+                    "$set": {
+                        "stock": nuevo_stock
+                    }
+                }
             )
 
+            return inventario_pb2.StockResponse(
+                stock=nuevo_stock,
+                precio=producto["precio"]
+            )
 
     # ===============================
     # ADMIN: ACTUALIZAR STOCK
     # ===============================
     def ActualizarStock(self, request, context):
 
-        producto = productos.get(request.id)
+        producto = productos_collection.find_one({"_id": request.id})
 
         if not producto:
             context.abort(grpc.StatusCode.NOT_FOUND, "Producto no encontrado")
 
-        producto["stock"] = request.stock
+        productos_collection.update_one(
+            {"_id": request.id},
+            {
+                "$set": {
+                    "stock": request.stock
+                    }
+                    })
+        
+        producto_actualizado = productos_collection.find_one({
+        "_id": request.id
+        })
 
         return inventario_pb2.Producto(
             id=request.id,
-            nombre=producto["nombre"],
-            precio=producto["precio"],
-            stock=producto["stock"],
-            imagen=producto["imagen"]
+            nombre=producto_actualizado["nombre"],
+            precio=producto_actualizado["precio"],
+            stock=producto_actualizado["stock"],
+            imagen=producto_actualizado["imagen"],
+            categoria=producto_actualizado["categoria"],
+            descripcion=str(producto_actualizado.get("descripcion",""))
         )
 
 
@@ -123,19 +129,31 @@ class InventarioService(inventario_pb2_grpc.InventarioServiceServicer):
     # ===============================
     def ActualizarPrecio(self, request, context):
 
-        producto = productos.get(request.id)
+        producto = productos_collection.find_one({"_id": request.id})
 
         if not producto:
             context.abort(grpc.StatusCode.NOT_FOUND, "Producto no encontrado")
-
-        producto["precio"] = request.precio
-
+            
+        productos_collection.update_one(
+           {"_id": request.id},
+           {
+               "$set": {
+                   "precio": request.precio
+                   }
+                   })
+            
+        producto_actualizado = productos_collection.find_one({
+                "_id": request.id
+                })
+            
         return inventario_pb2.Producto(
             id=request.id,
-            nombre=producto["nombre"],
-            precio=producto["precio"],
-            stock=producto["stock"],
-            imagen=producto["imagen"]
+            nombre=producto_actualizado["nombre"],
+            precio=producto_actualizado["precio"],
+            stock=producto_actualizado["stock"],
+            imagen=producto_actualizado["imagen"],
+            categoria=producto_actualizado["categoria"],
+            descripcion=str(producto_actualizado.get("descripcion",""))
         )
 
 
@@ -144,19 +162,31 @@ class InventarioService(inventario_pb2_grpc.InventarioServiceServicer):
     # ===============================
     def ActualizarNombre(self, request, context):
 
-        producto = productos.get(request.id)
+        producto = productos_collection.find_one({"_id": request.id})
 
         if not producto:
             context.abort(grpc.StatusCode.NOT_FOUND, "Producto no encontrado")
 
-        producto["nombre"] = request.nombre
-
+        productos_collection.update_one(
+            {"_id": request.id},
+            {
+                "$set": {
+                "nombre": request.nombre
+                }
+                })
+        
+        producto_actualizado = productos_collection.find_one({
+            "_id": request.id
+            })
+        
         return inventario_pb2.Producto(
             id=request.id,
-            nombre=producto["nombre"],
-            precio=producto["precio"],
-            stock=producto["stock"],
-            imagen=producto["imagen"]
+            nombre=producto_actualizado["nombre"],
+            precio=producto_actualizado["precio"],
+            stock=producto_actualizado["stock"],
+            imagen=producto_actualizado["imagen"],
+            categoria=producto_actualizado["categoria"],
+            descripcion=str(producto_actualizado.get("descripcion",""))
         )
 
 
@@ -165,42 +195,118 @@ class InventarioService(inventario_pb2_grpc.InventarioServiceServicer):
     # ===============================
     def ActualizarImagen(self, request, context):
 
-        producto = productos.get(request.id)
+        producto = productos_collection.find_one({"_id": request.id})
 
         if not producto:
             context.abort(grpc.StatusCode.NOT_FOUND, "Producto no encontrado")
 
-        producto["imagen"] = request.imagen
+        productos_collection.update_one(
+            {"_id": request.id},
+            {
+                "$set": {
+                "imagen": request.imagen
+                }
+                })
+        
+        producto_actualizado = productos_collection.find_one({
+            "_id": request.id
+            })
 
         return inventario_pb2.Producto(
             id=request.id,
-            nombre=producto["nombre"],
-            precio=producto["precio"],
-            stock=producto["stock"],
-            imagen=producto["imagen"]
+            nombre=producto_actualizado["nombre"],
+            precio=producto_actualizado["precio"],
+            stock=producto_actualizado["stock"],
+            imagen=producto_actualizado["imagen"],
+            categoria=producto_actualizado["categoria"],
+            descripcion=str(producto_actualizado.get("descripcion",""))
         )
-
+    
+    # ===============================
+    # ADMIN: ACTUALIZAR IMAGEN
+    # ===============================
+    
+    def ActualizarCategoria(self, request, context):
+        producto = productos_collection.find_one({"_id": request.id})
+        
+        if not producto:
+            context.abort(grpc.StatusCode.NOT_FOUND, "Producto no encontrado")
+            productos_collection.update_one(
+                {"_id": request.id},
+                {
+                    "$set": {
+                        "categoria": request.categoria
+                        }
+                        }
+                        )
+            
+            producto_actualizado = productos_collection.find_one({
+                "_id": request.id
+                })
+            return inventario_pb2.Producto(
+                id=request.id,
+                nombre=producto_actualizado["nombre"],
+                precio=producto_actualizado["precio"],
+                stock=producto_actualizado["stock"],
+                imagen=producto_actualizado["imagen"],
+                categoria=producto_actualizado["categoria"],
+                descripcion=str(producto_actualizado.get("descripcion",""))
+                )
+        
+    # ===============================
+    # ADMIN: AGREGAR PRODUCTO
+    # ===============================
+    def ActualizarDescripcion(self, request, context):
+        producto = productos_collection.find_one({"_id": request.id})
+        
+        if not producto:
+            context.abort(grpc.StatusCode.NOT_FOUND, "Producto no encontrado")
+            productos_collection.update_one(
+                {"_id": request.id},
+                {
+                    "$set": {
+                        "descripcion": request.descripcion
+                        }
+                        })
+            producto_actualizado = productos_collection.find_one({
+                "_id": request.id
+                })
+            return inventario_pb2.Producto(
+                id=request.id,
+                nombre=producto_actualizado["nombre"],
+                precio=producto_actualizado["precio"],
+                stock=producto_actualizado["stock"],
+                imagen=producto_actualizado["imagen"],
+                categoria=producto_actualizado["categoria"],
+                descripcion=str(producto_actualizado.get("descripcion",""))
+                )
 
     # ===============================
     # ADMIN: AGREGAR PRODUCTO
     # ===============================
     def AgregarProducto(self, request, context):
 
-        nuevo_id = max(productos.keys()) + 1
-
-        productos[nuevo_id] = {
+        nuevo_id = (max(productos_collection.find({}, {"_id": 1}),key=lambda x: x["_id"]
+        )["_id"] + 1 if productos_collection.count_documents({}) > 0 else 1)
+        
+        productos_collection.insert_one({
+            "_id": nuevo_id,
             "nombre": request.nombre,
             "precio": request.precio,
             "stock": request.stock,
-            "imagen": request.imagen
-        }
+            "imagen": request.imagen,
+            "categoria": request.categoria,
+            "descripcion": request.descripcion
+        })
 
         return inventario_pb2.Producto(
             id=nuevo_id,
             nombre=request.nombre,
             precio=request.precio,
             stock=request.stock,
-            imagen=request.imagen
+            imagen=request.imagen,
+            categoria=request.categoria,
+            descripcion=str(request.descripcion)
         )
 
 
@@ -209,8 +315,7 @@ class InventarioService(inventario_pb2_grpc.InventarioServiceServicer):
     # ===============================
     def EliminarProducto(self, request, context):
 
-        if request.id in productos:
-            del productos[request.id]
+        productos_collection.delete_one({"_id": request.id})
 
         return inventario_pb2.Empty()
 

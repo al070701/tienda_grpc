@@ -17,7 +17,7 @@ import inventario_pb2_grpc
 historial_compras = []
 id_compra = 1
 
-GRPC_SERVER = "26.145.132.10:50051"
+GRPC_SERVER = "inventario:50051"
 
 app = FastAPI()
 
@@ -46,13 +46,13 @@ app.add_middleware(
 # ==============================
 # Conexión con Carrito
 # ==============================
-channel_carrito = grpc.insecure_channel('26.145.132.10:50055')
+channel_carrito = grpc.insecure_channel('carrito:50055')
 stub_carrito = carrito_pb2_grpc.CarritoServiceStub(channel_carrito)
 
 # ==============================
 # Conexión con Inventario
 # ==============================
-channel_inventario = grpc.insecure_channel('26.145.132.10:50051')
+channel_inventario = grpc.insecure_channel('inventario:50051')
 stub_inventario = inventario_pb2_grpc.InventarioServiceStub(channel_inventario)
 
 
@@ -71,7 +71,9 @@ def home():
 def listar_productos():
 
     try:
-        response = stub_carrito.ListarProductos(carrito_pb2.Empty())
+        response = stub_inventario.ListarProductos(
+            inventario_pb2.Empty()
+            )
 
         productos = []
 
@@ -81,14 +83,23 @@ def listar_productos():
                 "nombre": p.nombre,
                 "precio": p.precio,
                 "stock": p.stock,
-                "imagen": p.imagen
+                "imagen": p.imagen,
+                "categoria": p.categoria,
+                "descripcion": p.descripcion
             })
 
         return productos
 
-    except grpc.RpcError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        
+        print("ERROR EN /productos:")
+        print(e)
 
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+    
 
 # ==============================
 # COMPRAR PRODUCTO
@@ -185,7 +196,9 @@ async def agregar_producto(
     nombre: str = Form(...),
     precio: float = Form(...),
     stock: int = Form(...),
-    imagen: UploadFile = File(...)
+    categoria: str = Form(...),
+    imagen: UploadFile = File(...),
+    descripcion: str = Form(...)
 
 ):
 
@@ -200,7 +213,9 @@ async def agregar_producto(
             nombre=nombre,
             precio=precio,
             stock=stock,
-            imagen=imagen.filename
+            imagen=imagen.filename,
+            categoria=categoria,
+            descripcion=descripcion
         )
 
     )

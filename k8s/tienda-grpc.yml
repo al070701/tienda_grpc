@@ -1,0 +1,141 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventario
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventario
+  template:
+    metadata:
+      labels:
+        app: inventario
+    spec:
+      containers:
+        - name: inventario
+          image: tienda-grpc:local
+          imagePullPolicy: IfNotPresent
+          command: ["python", "inventario/servidor_inventario.py"]
+          ports:
+            - containerPort: 50051
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventario
+spec:
+  selector:
+    app: inventario
+  ports:
+    - name: grpc
+      port: 50051
+      targetPort: 50051
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pago
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pago
+  template:
+    metadata:
+      labels:
+        app: pago
+    spec:
+      containers:
+        - name: pago
+          image: tienda-grpc:local
+          imagePullPolicy: IfNotPresent
+          command: ["python", "pago/servidor_pago.py"]
+          ports:
+            - containerPort: 50053
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pago
+spec:
+  selector:
+    app: pago
+  ports:
+    - name: grpc
+      port: 50053
+      targetPort: 50053
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: carrito
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: carrito
+  template:
+    metadata:
+      labels:
+        app: carrito
+    spec:
+      containers:
+        - name: carrito
+          image: tienda-grpc:local
+          imagePullPolicy: IfNotPresent
+          command: ["python", "carrito/servidor_carrito.py"]
+          ports:
+            - containerPort: 50055
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: carrito
+spec:
+  selector:
+    app: carrito
+  ports:
+    - name: grpc
+      port: 50055
+      targetPort: 50055
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-backend
+  template:
+    metadata:
+      labels:
+        app: web-backend
+    spec:
+      containers:
+        - name: web-backend
+          image: tienda-grpc:local
+          imagePullPolicy: IfNotPresent
+          command:
+            - uvicorn
+            - web_backend.main:app
+            - --host
+            - 0.0.0.0
+            - --port
+            - "8000"
+          ports:
+            - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-backend
+spec:
+  selector:
+    app: web-backend
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RELLENITOS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=DynaPuff:wght@400..700&family=Viga&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <link href="../css/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css" />
+
+    <style>
+        .font-cherry { font-family: 'Cherry Bomb One', cursive; }
+        .font-viga { font-family: 'Viga', sans-serif; }   
+        .font-dynapuff { font-family: 'DynaPuff', cursive; }
+        .highlight-word { color: #d26ae6; }
+        .text-justify { text-align: justify; text-align-last: justify; }
+
+    </style>
+
+</head>
+<body>
+    <header class="bg-[#5ee1e6] text-white p-8">
+        <nav class="flex justify-end h-14">
+            <ul class="flex space-x-10 text-xl font-viga font-extrabold pt-4">
+                <li class=" hover:text-[#b825d4]" onclick="irInicio();">HOGAR</li>
+                <li class=" hover:text-[#b825d4]" onclick="irProductos();">PRODUCTO</li>
+                <li class=" hover:text-[#b825d4]" onclick="irAcerca();">ACERCA DE</li>
+                <li class=" hover:text-[#b825d4]" onclick="irContacto();">CONTACTO</li>
+                <li>
+                    <svg class="hover:text-[#E6B86E]" width="21" height="21" fill="currentColor">
+                        <use href="../assets/sprite.svg#buscador" xlink:href="../assets/sprite.svg#buscador" />
+                    </svg>
+                </li>
+                
+                <li>
+                    <svg class="hover:text-[#E6B86E]" width="21" height="21" fill="currentColor" onclick="irCarrito();">
+                        <use href="../assets/sprite.svg#carrito" xlink:href="../assets/sprite.svg#carrito" />
+                    </svg>
+                </li>
+                <li>
+                    <svg class="hover:text-[#aba9a7]" width="21" height="21" fill="currentColor" onclick="irPerfil();">
+                        <use href="../assets/sprite.svg#usuario" xlink:href="../assets/sprite.svg#usuario" />
+                    </svg>
+                </li>
+
+            </ul>
+        </nav>
+
+    </header>
+    
+    <script src="../js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+     <script type="module" src="../js/app.js"></script>
+    <script type="module" src="../js/app.js"></script>
+</body>
+</html>

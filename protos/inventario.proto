@@ -15,6 +15,8 @@ service InventarioService {
   rpc EliminarProducto (EliminarProductoRequest) returns (Empty);
   rpc ActualizarNombre (ActualizarNombreRequest) returns (Producto);
   rpc ActualizarImagen (ActualizarImagenRequest) returns (Producto);
+  rpc ActualizarCategoria (ActualizarCategoriaRequest) returns (Producto);
+rpc ActualizarDescripcion (ActualizarDescripcionRequest) returns (Producto);
 }
 
 message Empty {}
@@ -25,6 +27,8 @@ message Producto {
   float precio = 3;
   int32 stock = 4;
   string imagen = 5;
+  string categoria = 6;
+  string descripcion = 7;
 }
 
 message ListaProductos {
@@ -56,6 +60,8 @@ message NuevoProducto {
   float precio = 2;
   int32 stock = 3;
   string imagen = 4;
+  string categoria =5;
+  string descripcion = 6;
 }
 
 message EliminarProductoRequest {
@@ -70,4 +76,14 @@ message ActualizarNombreRequest {
 message ActualizarImagenRequest {
   int32 id = 1;
   string imagen = 2;
+}
+
+message ActualizarCategoriaRequest {
+  int32 id = 1;
+  string categoria = 2;
+}
+
+message ActualizarDescripcionRequest {
+  int32 id = 1;
+  string descripcion = 2;
 }

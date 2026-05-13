@@ -1,0 +1,35 @@
+services:
+  inventario:
+    build: .
+    container_name: tienda_inventario
+    command: python inventario/servidor_inventario.py
+    ports:
+      - "50051:50051"
+
+  pago:
+    build: .
+    container_name: tienda_pago
+    command: python pago/servidor_pago.py
+    ports:
+      - "50053:50053"
+
+  carrito:
+    build: .
+    container_name: tienda_carrito
+    command: python carrito/servidor_carrito.py
+    ports:
+      - "50055:50055"
+    depends_on:
+      - inventario
+      - pago
+
+  web_backend:
+    build: .
+    container_name: tienda_web_backend
+    command: uvicorn web_backend.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - inventario
+      - carrito
+      - pago
