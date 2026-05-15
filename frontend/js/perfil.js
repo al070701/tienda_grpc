@@ -18,6 +18,12 @@ const API = "http://26.145.132.10:8000";
 PROTEGER PERFIL
 ========================= */
 
+let intervaloPedidos = null;
+
+window.volverInicio = function(){
+    window.location.href = "index.html";
+};
+
 onAuthStateChanged(auth,(user)=>{
 
     if(!user){
@@ -27,6 +33,23 @@ onAuthStateChanged(auth,(user)=>{
 
     cargarDatos(user);
     cargarPedidos();
+
+    const seccionGuardada = localStorage.getItem("seccion_perfil") || "cuenta";
+    mostrarSeccion(seccionGuardada);
+
+if(intervaloPedidos){
+        clearInterval(intervaloPedidos);
+    }
+
+    intervaloPedidos = setInterval(() => {
+
+        const contenedor = document.getElementById("contenedor-pedidos-cliente");
+
+        if(contenedor){
+            cargarPedidos();
+        }
+
+    }, 5000);
 });
 
 /* =========================
@@ -54,10 +77,13 @@ window.mostrarSeccion = function(id){
         sec.classList.add("hidden");
     });
 
-    document
-    .getElementById(id)
-    .classList.remove("hidden");
-}
+    const seccion = document.getElementById(id);
+
+    if(seccion){
+        seccion.classList.remove("hidden");
+        localStorage.setItem("seccion_perfil", id);
+    }
+};
 
 /* =========================
 GUARDAR NOMBRE
@@ -118,6 +144,94 @@ window.guardarNombre = async function(){
             "error"
         );
     }   
+}
+
+async function cargarHistorial(){
+
+    let res = await fetch(API + "/admin/pedidos");
+    let data = await res.json();
+
+    let tabla = document.getElementById("tablaHistorial");
+    tabla.innerHTML = "";
+
+    data.forEach(p=>{
+
+        const productos = (p.items || []).map(item => {
+            return `${item.cantidad} x ${item.nombre}`;
+        }).join("<br>");
+
+        tabla.innerHTML += `
+        <tr>
+
+            <td>${p._id}</td>
+            <td>${p.usuario}</td>
+            <td>${productos}</td>
+            <td>$${p.total}</td>
+            <td>${p.estado}</td>
+
+            <td>
+                <button class="btn btn-sm btn-warning"
+                onclick="actualizarEstadoPedido('${p._id}','En preparación')">
+                    En preparación
+                </button>
+
+                <button class="btn btn-sm btn-primary"
+                onclick="actualizarEstadoPedido('${p._id}','En camino')">
+                    En camino
+                </button>
+
+                <button class="btn btn-sm btn-success"
+                onclick="actualizarEstadoPedido('${p._id}','Entregado')">
+                    Entregado
+                </button>
+
+                <button class="btn btn-sm btn-danger"
+                onclick="rechazarPedido('${p._id}')">
+                    Rechazar
+                </button>
+            </td>
+
+        </tr>
+        `;
+    });
+}
+
+
+async function actualizarEstadoPedido(id, estado){
+
+    await fetch(API + "/admin/pedidos/" + id + "/estado", {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            estado: estado
+        })
+    });
+
+    cargarHistorial();
+}
+
+async function rechazarPedido(id){
+
+    const motivo = prompt("Motivo del rechazo:");
+
+    if(motivo === null){
+        return;
+    }
+
+    await fetch(API + "/admin/pedidos/" + id + "/estado", {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            estado: "Rechazado",
+            motivo_rechazo: motivo || "Compra rechazada por administración"
+        })
+    });
+
+    cargarHistorial();
 }
 
 /* =========================
@@ -238,152 +352,30 @@ async function cargarPedidos(){
 
     try{
 
-        const usuario =
-        auth.currentUser.email;
+        const usuario = auth.currentUser.email;
 
-        let res =
-        await fetch(API + "/historial/" + usuario);
+        let res = await fetch(
+            API + "/pedidos/cliente/" + encodeURIComponent(usuario) + "?_=" + Date.now()
+        );
 
-        let data =
-        await res.json();
+        let pedidos = await res.json();
 
         const contenedor =
-        document.getElementById("lista-pedidos");
+        document.getElementById("contenedor-pedidos-cliente");
 
         contenedor.innerHTML = "";
 
-        function colorEstado(estado){
-
-            if(estado === "preparando"){
-                return "bg-yellow-400";
-            }
-
-            if(estado === "camino"){
-                return "bg-blue-500";
-            }
-
-            if(estado === "entregado"){
-                return "bg-green-500";
-            }
-
-            return "bg-gray-400";
-        }
-
-        function textoEstado(estado){
-
-            if(estado === "preparando"){
-                return "Preparando";
-            }
-
-            if(estado === "camino"){
-                return "En camino";
-            }
-
-            if(estado === "entregado"){
-                return "Entregado";
-            }
-
-            return "Desconocido";
-        }
-
-        function crearCard(p){
-
-            return `
-            <div class="bg-white rounded-3xl shadow-lg p-6 border border-gray-100">
-
-                <div class="flex justify-between items-center mb-5">
-
-                    <h3 class="text-xl font-bold">
-                        Pedido #${p.id || ""}
-                    </h3>
-
-                    <span class="
-                    ${colorEstado(p.estado)}
-                    text-white
-                    px-4
-                    py-2
-                    rounded-full
-                    text-sm
-                    font-bold
-                    ">
-                        ${textoEstado(p.estado)}
-                    </span>
-
-                </div>
-
-                <div class="space-y-2 text-gray-600">
-
-                    <p>
-                        <b>Producto:</b>
-                        ${p.producto || "Producto"}
-                    </p>
-
-                    <p>
-                        <b>Cantidad:</b>
-                        ${p.cantidad}
-                    </p>
-
-                    <p>
-                        <b>Fecha:</b>
-                        ${p.fecha}
-                    </p>
-
-                </div>
-
-                <!-- BARRA VISUAL -->
-
-                <div class="mt-6">
-
-                    <div class="flex justify-between text-sm mb-2">
-
-                        <span>Preparando</span>
-                        <span>En camino</span>
-                        <span>Entregado</span>
-
-                    </div>
-
-                    <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-
-                        <div
-                        class="
-                        h-full
-                        transition-all
-                        duration-500
-
-                        ${
-                            p.estado === "preparando"
-                            ? "w-1/3 bg-yellow-400"
-                            : p.estado === "camino"
-                            ? "w-2/3 bg-blue-500"
-                            : "w-full bg-green-500"
-                        }
-                        ">
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
+        if(!pedidos.length){
+            contenedor.innerHTML = `
+                <p class="text-gray-500 text-center">
+                    Aún no tienes compras registradas.
+                </p>
             `;
+            return;
         }
 
-        window.volverInicio = function(){
-            window.location.href = "index.html";
-        }
-
-        const pedidos = [
-
-            ...(data.preparando || []),
-            ...(data.camino || []),
-            ...(data.entregados || [])
-
-        ];
-
-        pedidos.forEach(p=>{
-
-            contenedor.innerHTML +=
-            crearCard(p);
+        pedidos.forEach(pedido=>{
+            contenedor.innerHTML += crearCardPedido(pedido);
         });
 
     }catch(error){
@@ -397,3 +389,115 @@ async function cargarPedidos(){
         );
     }
 }
+
+function crearCardPedido(pedido){
+
+    const porcentaje = obtenerPorcentajeEstado(pedido.estado);
+
+    const productos = (pedido.items || []).map(item => `
+        <li class="text-sm text-gray-600">
+            ${item.cantidad} x ${item.nombre} - $${item.subtotal}
+        </li>
+    `).join("");
+
+    return `
+    <div class="bg-white rounded-3xl shadow-lg p-6 border border-gray-100">
+
+        <div class="flex justify-between items-center mb-5">
+
+            <h3 class="text-xl font-bold">
+                Pedido #${pedido._id}
+            </h3>
+
+            <span class="
+            ${colorEstado(pedido.estado)}
+            text-white
+            px-4
+            py-2
+            rounded-full
+            text-sm
+            font-bold
+            ">
+                ${pedido.estado}
+            </span>
+
+        </div>
+
+        <p class="font-bold text-gray-700 mb-3">
+            Total: $${pedido.total}
+        </p>
+
+        <ul class="space-y-1 mb-5">
+            ${productos}
+        </ul>
+
+        <div class="mt-6">
+
+            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                <div
+                class="
+                h-full
+                transition-all
+                duration-700
+                ${pedido.estado === "Rechazado" ? "bg-red-500" : "bg-cyan-400"}
+                "
+                style="width:${porcentaje}%;">
+                </div>
+            </div>
+
+            ${
+                pedido.estado === "Rechazado"
+                ? `<p class="mt-4 text-red-500 font-bold">
+                    Motivo: ${pedido.motivo_rechazo || "Compra rechazada por administración"}
+                   </p>`
+                : ""
+            }
+
+        </div>
+
+    </div>
+    `;
+}
+
+function obtenerPorcentajeEstado(estado){
+
+    if(estado === "En preparación"){
+        return 33;
+    }
+
+    if(estado === "En camino"){
+        return 66;
+    }
+
+    if(estado === "Entregado"){
+        return 100;
+    }
+
+    if(estado === "Rechazado"){
+        return 100;
+    }
+
+    return 0;
+}
+
+function colorEstado(estado){
+
+    if(estado === "En preparación"){
+        return "bg-yellow-400";
+    }
+
+    if(estado === "En camino"){
+        return "bg-blue-500";
+    }
+
+    if(estado === "Entregado"){
+        return "bg-green-500";
+    }
+
+    if(estado === "Rechazado"){
+        return "bg-red-500";
+    }
+
+    return "bg-gray-400";
+}
+

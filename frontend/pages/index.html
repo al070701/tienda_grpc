@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RELLENITOS</title>
+    <link rel="icon" type="image/x-icon" href="../assets/logo_azul.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=DynaPuff:wght@400..700&family=Viga&display=swap" rel="stylesheet">
@@ -22,18 +23,19 @@
 
 </head>
 <body>
-    <header class="bg-[#5ee1e6] text-white p-8">
-        <nav class="flex justify-end h-14">
-            <ul class="flex space-x-10 text-xl font-viga font-extrabold pt-4">
+    <header class="bg-[#5ee1e6] text-white">
+        <nav class="flex justify-between items-center p-6">
+
+            <img 
+                src="../assets/logo_blanco.png" 
+                alt="Logo Rellenitos"
+                class="h-20 w-auto object-contain"
+            >
+
+            <ul class="flex space-x-10 text-xl font-viga font-extrabold items-center">
                 <li class=" hover:text-[#b825d4]" onclick="irInicio();">HOGAR</li>
                 <li class=" hover:text-[#b825d4]" onclick="irProductos();">PRODUCTO</li>
                 <li class=" hover:text-[#b825d4]" onclick="irAcerca();">ACERCA DE</li>
-                <li class=" hover:text-[#b825d4]" onclick="irContacto();">CONTACTO</li>
-                <li>
-                    <svg class="hover:text-[#E6B86E]" width="21" height="21" fill="currentColor">
-                        <use href="../assets/sprite.svg#buscador" xlink:href="../assets/sprite.svg#buscador" />
-                    </svg>
-                </li>
                 
                 <li>
                     <svg class="hover:text-[#E6B86E]" width="21" height="21" fill="currentColor" onclick="irCarrito();">
@@ -76,28 +78,28 @@
                         <h2 class="text-2xl font-semibold pb-4 text-center text-[#d26ae6] font-dynapuff">Taiyaki sabor matcha</h2>
                         <div class="h-44 mb-4 rounded-3xl bg-white/10 flex items-center justify-center text-sm uppercase tracking-wide"><img src="../assets/matcha.png" alt=""></div>
                         <p class="text-base leading-7">Taiyaki con helado mitad vainilla, mitad matcha y relleno de jarabe sabor matcha.</p>
-                        <button class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold hover:bg-[#23cbd1] py-3">¡ORDENA AHORA!</button>
+                        <button onclick="ordenarProductoInicio(13)" class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold hover:bg-[#23cbd1] py-3">¡ORDENA AHORA!</button>
                     </div>
 
                     <div class="swiper-slide slide-card">
                         <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Taiyaki sabor frambuesa</h2>
                         <div class="h-44 mb-4 rounded-3xl bg-white/10 flex items-center justify-center text-sm uppercase tracking-wide"><img width="105" src="../assets/frambuesa.png" alt=""></div>
                         <p class="text-base leading-7 mb-6 ">Taiyaki con helado mitad vainilla, mitad frambuesa y relleno de jarabe sabor frambuesa.</p>
-                        <button class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]">¡ORDENA AHORA!</button>
+                        <button onclick="ordenarProductoInicio(12)"   class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]">¡ORDENA AHORA!</button>
                     </div>
 
                     <div class="swiper-slide slide-card">
                         <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Taiyaki sabor piña colada</h2>
                         <div class="h-44 mb-4 rounded-3xl bg-white/10 flex items-center justify-center text-sm uppercase tracking-wide"><img width="360" src="../assets/pina.png" alt=""></div>
                         <p class="text-base leading-7 mb-6">Taiyaki con helado de piña y relleno de una mezcla sabor piña con licor y coco.</p>
-                        <button class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]">¡ORDENA AHORA!</button>
+                        <button onclick="ordenarProductoInicio(11)" class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]">¡ORDENA AHORA!</button>
                     </div>
 
                     <div class="swiper-slide slide-card">
                         <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Taiyaki sabor chocolate de dubai</h2>
                         <div class="h-44 mb-4 rounded-3xl bg-white/10 flex items-center justify-center text-sm uppercase tracking-wide"><img width="95" src="../assets/dubai.png" alt=""></div>
                         <p class="text-base leading-7 mb-6">Taiyaki con helado de pistacho y relleno de una mezcla de chocolate de dubai con almendras.</p>
-                        <button class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]"   >¡ORDENA AHORA!</button>
+                        <button onclick="ordenarProductoInicio(15)"  class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]"   >¡ORDENA AHORA!</button>
                     </div>
 
                 </div>
@@ -108,7 +110,7 @@
         </section>
 
         <section class="h-[300px] pt-6 pb-6">
-            <h1 class="text-[#d26ae6] text-3xl font-semibold font-dynapuff text-center mb-6 pt-12"> ¡Complementa tu orden con toda esta variedad de toppings! </h1>
+            <h1 class="text-[#d26ae6] text-3xl font-semibold font-dynapuff text-center mb-6 pt-12"> ¡Utilizamos toppings de la mas alta calidad en los productos! </h1>
             
             <div class="overflow-hidden">
                 <div class="flex w-max animate-marquee">
@@ -160,42 +162,42 @@
                         <h2 class="text-2xl font-semibold pb-4 text-center text-[#d26ae6] font-dynapuff">Panditas de fresa</h2>
                         <div class="h-44 mb-4 rounded-3xl bg-white/10 flex items-center justify-center text-sm uppercase tracking-wide"><img width="190" src="../assets/gomapanda.png" alt=""></div>
                         <p class="text-base leading-7">Gomitas japonesasde uva verde y morada.</p>
-                        <button class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold hover:bg-[#23cbd1] py-3">¡ORDENA AHORA!</button>
+                        <button onclick="ordenarProductoInicio(16)"  class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold hover:bg-[#23cbd1] py-3">¡ORDENA AHORA!</button>
                     </div>
 
                     <div class="swiper-slide slide-card">
-                        <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Uvas</h2>
+                        <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Vainilla con chocolate</h2>
                         <div class="h-44 mb-4 rounded-3xl bg-white/10 flex items-center justify-center text-sm uppercase tracking-wide"><img width="600" src="../assets/gomavainilla.png" alt=""></div>
                         <p class="text-base leading-7 mb-6 ">Gomitas japonesas de fresa.</p>
-                        <button class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]">¡ORDENA AHORA!</button>
+                        <button onclick="ordenarProductoInicio(20)" class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]">¡ORDENA AHORA!</button>
                     </div>
 
                     <div class="swiper-slide slide-card">
-                        <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Melocotón</h2>
+                        <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Uva morada</h2>
                         <div class="h-44 mb-4 rounded-3xl bg-white/10 flex items-center justify-center text-sm uppercase tracking-wide"><img width="200" src="../assets/gomamorada.png" alt=""></div>
                         <p class="text-base leading-7 mb-6">Taiyaki con helado de piña y relleno de una mezcla sabor piña con licor y coco.</p>
-                        <button class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]">¡ORDENA AHORA!</button>
+                        <button onclick="ordenarProductoInicio(19)" class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]">¡ORDENA AHORA!</button>
                     </div>
 
                     <div class="swiper-slide slide-card">
-                        <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Fresa</h2>
+                        <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Cereza</h2>
                         <div class="h-44 mb-4 rounded-3xl bg-white/10 flex items-center justify-center text-sm uppercase tracking-wide"><img width="300" src="../assets/gomacereza.png" alt=""></div>
                         <p class="text-base leading-7 mb-6">Taiyaki con helado de pistacho y relleno de una mezcla de chocolate de dubai con almendras.</p>
-                        <button class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]"   >¡ORDENA AHORA!</button>
+                        <button onclick="ordenarProductoInicio(18)" class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]">¡ORDENA AHORA!</button>
                     </div>
                     
                     <div class="swiper-slide slide-card">
-                        <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Fresa</h2>
+                        <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Uvas</h2>
                         <div class="h-44 mb-4 rounded-3xl bg-white/10 flex items-center justify-center text-sm uppercase tracking-wide"><img width="300" src="../assets/gomauva.png" alt=""></div>
                         <p class="text-base leading-7 mb-6">Taiyaki con helado de pistacho y relleno de una mezcla de chocolate de dubai con almendras.</p>
-                        <button class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]"   >¡ORDENA AHORA!</button>
+                        <button onclick="ordenarProductoInicio(17)" class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]"   >¡ORDENA AHORA!</button>
                     </div>
 
                     <div class="swiper-slide slide-card">
-                        <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Fresa</h2>
+                        <h2 class="text-2xl font-semibold pb-4 text-[#d26ae6] font-dynapuff text-center">Flan</h2>
                         <div class="h-44 mb-4 rounded-3xl bg-white/10 flex items-center justify-center text-sm uppercase tracking-wide"><img width="300" src="../assets/gomapurin.png" alt=""></div>
                         <p class="text-base leading-7 mb-6">Taiyaki con helado de pistacho y relleno de una mezcla de chocolate de dubai con almendras.</p>
-                        <button class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]"   >¡ORDENA AHORA!</button>
+                        <button onclick="ordenarProductoInicio(21)" class="w-full rounded-xl bg-[#5ee1e6] text-white font-bold py-3 hover:bg-[#23cbd1]"   >¡ORDENA AHORA!</button>
                     </div>
 
                 </div>
@@ -207,23 +209,119 @@
 
     </main>
 
-    <footer class="bg-[#5ee1e6] text-white p-12">
-        <div>
-            <h1>CONTACTO</h1>
-            <p>Telefono: 123-456-7890</p>
-            <p>Email: info@tienda.com</p>
+<footer class="bg-[#5ee1e6] text-white mt-12 overflow-hidden pt-4">
+
+    <div class="max-w-7xl mx-auto px-6 py-8">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+
+
+            <div>
+
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center border-2 border-dashed border-white/50 shrink-0">
+                        <span class="font-viga text-xs text-center px-2">
+                            <img 
+                            src="../assets/logo_blanco.png" 
+                            alt="Logo Rellenitos"
+                             class="h-20 w-auto object-contain"
+                             >
+                        </span>
+                    </div>
+
+                    <div>
+                        <h2 class="font-cherry text-3xl text-[#d26ae6] leading-none">
+                            RELLENITOS
+                        </h2>
+
+                        <p class="font-viga text-white/90 text-sm mt-1">
+                            Taiyakis llenitos de sabor ✨
+                        </p>
+                    </div>
+
+                </div>
+
+                <p class="font-viga text-sm leading-6 text-white/90 max-w-md">
+                    Disfruta los taiyakis más virales en Campeche: sabores <br> únicos,
+                    toppings variados y mucho sabor en cada bocado.
+                </p>
+
+            </div>
+
+            <!-- REDES / ICONOS -->
+             <div class="md:text-right">
+                <h3 class="font-dynapuff text-xl text-start font-bold mb-4 text-[#d26ae6]" >
+                    ¡SÍGUENOS <br>EN REDES!
+                </h3>
+                
+                <div class="flex md:justify-end gap-3">
+
+                    <!-- Facebook -->
+                     <a 
+                     href="https://www.facebook.com/"
+                     target="_blank" class="w-11 h-11 rounded-full bg-white/20 hover:bg-[#d26ae6] flex items-center justify-center transition shadow-md"
+                     aria-label="Facebook">
+                     <span class="text-sm font-viga">FB</span>
+                    </a>
+
+                    <!-- Instagram -->
+                    <a 
+                    href="https://www.instagram.com/"
+                    target="_blank"
+                     class="w-11 h-11 rounded-full bg-white/20 hover:bg-[#d26ae6] flex items-center justify-center transition shadow-md"
+                    aria-label="Instagram">
+                
+                    <span class="text-sm font-viga">IG</span>
+                    </a>
+
+                    <!-- TikTok -->
+                    <a 
+                    href="https://www.tiktok.com/"
+                    target="_blank"
+                    class="w-11 h-11 rounded-full bg-white/20 hover:bg-[#d26ae6] flex items-center justify-center transition shadow-md"
+                    aria-label="TikTok">
+
+            
+                    <span class="text-sm font-viga">TK</span>
+                    </a>
+
+        <!-- Correo -->
+        <a 
+        href="https://mail.google.com/"
+        class="w-11 h-11 rounded-full bg-white/20 hover:bg-[#d26ae6] flex items-center justify-center transition shadow-md"
+        aria-label="Correo">
+
+            <!-- Pega aquí tu SVG de correo -->
+            <span class="text-sm font-viga">@</span>
+
+        </a>
+
+    </div>
+
+</div>
+
         </div>
 
-        <div>
-            <h1>REDES SOCIALES</h1>
-            <section class="flex">
-                <a href="https://www.facebook.com/"><img class="w-6" src="../assets/facebook.png" alt="Facebook"></a>
-                <a href="https://www.twitter.com/"><img class="w-6" src="../assets/twitter.png" alt="Twitter"></a>
-                <a href="https://www.instagram.com/"><img class="w-6" src="../assets/instagram.png" alt="Instagram"></a>
+    </div>
 
-            </section>
+    <!-- PARTE INFERIOR -->
+    <div class="border-t border-white/20">
+
+        <div class="max-w-7xl mx-auto px-6 py-3 flex flex-col md:flex-row justify-between items-center gap-2">
+
+            <p class="font-viga text-xs text-white/80 text-center">
+                © 2026 Rellenitos. Todos los derechos reservados.
+            </p>
+
+            <p class="font-viga text-xs text-white/80">
+                Hecho con amor y mucho antojo ♡
+            </p>
+
         </div>
-    </footer>
+
+    </div>
+
+</footer>
 
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

@@ -5,17 +5,16 @@ import certifi
 
 load_dotenv()
 
-MONGO_URI = os.getenv("MONGO_URI")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017/rellenitos")
 
 if not MONGO_URI:
     raise ValueError("No se encontró MONGO_URI")
 
 client = MongoClient(
     MONGO_URI,
-    tls=True,
-    tlsCAFile=certifi.where(),
-    serverSelectionTimeoutMS=30000
+    serverSelectionTimeoutMS=10000
 )
+
 
 db = client["rellenitos"]
 

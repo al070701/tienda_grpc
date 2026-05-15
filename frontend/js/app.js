@@ -143,36 +143,81 @@ function cargarProductos(){
 
         console.log(productos);
 
-        // ahora ya vienen con categoria desde backend
         productosGlobal = productos;
 
-        //guardar nombres (si lo usas en carrito/historial)
         productos.forEach(p => {
             mapaProductos[p.id] = p.nombre;
         });
 
-        //render inicial
-        renderProductos(productosGlobal);
+        const container = document.getElementById("productos-container");
 
-        cargarCarrito(); // para actualizar stock en carrito
+        if(container){
+            window.aplicarFiltros();
+        }
 
+        cargarCarrito();
     })
     .catch(err => {
         console.error("Error:", err);
     });
 }
 
-// setInterval(()=>{cargarProductos()},5000);
+async function refrescarProductos(){
+    try {
+        const res = await fetch(API + "/productos");
+
+        if (!res.ok) {
+            throw new Error("Error al refrescar productos");
+        }
+
+        const productos = await res.json();
+
+        productosGlobal = productos;
+
+        productos.forEach(p => {
+            mapaProductos[p.id] = p.nombre;
+        });
+
+        const container = document.getElementById("productos-container");
+
+        if(container){
+            window.aplicarFiltros();
+        }
+
+        cargarCarrito();
+
+        return productosGlobal;
+
+    } catch (error) {
+        console.error("Error refrescando productos:", error);
+    }
+}
+
+setInterval(()=>{cargarProductos()},5000);
 
 window.addEventListener("DOMContentLoaded", () => {
 
-    const container =
-    document.getElementById("productos-container");
+    const selectOrden = document.getElementById("orden");
+    const selectCategoria = document.getElementById("categoria");
+
+    const ordenGuardado = localStorage.getItem("filtro_orden");
+    const categoriaGuardada = localStorage.getItem("filtro_categoria");
+
+    if(selectOrden && ordenGuardado){
+        selectOrden.value = ordenGuardado;
+    }
+
+    if(selectCategoria && categoriaGuardada){
+        selectCategoria.value = categoriaGuardada;
+    }
+
+    const container = document.getElementById("productos-container");
 
     if(container){
-        cargarProductos();
+        refrescarProductos();
     }
-});
+
+}, 5000);
 
 
 function renderProductos(lista){
@@ -181,7 +226,6 @@ const container =
 document.getElementById("productos-container");
 
 if(!container){
-    console.log("No existe productos-container");
     return;
 }
 
@@ -237,50 +281,103 @@ container.innerHTML += `
 
 }
 
-
-window.aplicarFiltros = function(){
+function obtenerListaFiltrada(){
 
     let lista = [...productosGlobal];
 
-    const orden = document.getElementById("orden").value;
-    const categoria = document.getElementById("categoria").value;
+    const selectOrden = document.getElementById("orden");
+    const selectCategoria = document.getElementById("categoria");
 
+    const orden = selectOrden ? selectOrden.value : "normal";
+    const categoria = selectCategoria ? selectCategoria.value : "todos";
 
-    // FILTRO POR CATEGORÍA (YA REAL DESDE BACKEND)
+    // Guardar filtros seleccionados
+    localStorage.setItem("filtro_orden", orden);
+    localStorage.setItem("filtro_categoria", categoria);
+
+    // FILTRO POR CATEGORÍA
     if(categoria !== "todos"){
         lista = lista.filter(p => p.categoria === categoria);
     }
 
-
     // ORDEN ALFABÉTICO
     if(orden === "az"){
-        lista.sort((a,b)=> a.nombre.localeCompare(b.nombre));
+        lista.sort((a,b) => a.nombre.localeCompare(b.nombre));
     }
 
     if(orden === "za"){
-        lista.sort((a,b)=> b.nombre.localeCompare(a.nombre));
+        lista.sort((a,b) => b.nombre.localeCompare(a.nombre));
     }
-
 
     // ORDEN POR PRECIO
     if(orden === "precioAsc"){
-        lista.sort((a,b)=> a.precio - b.precio);
+        lista.sort((a,b) => Number(a.precio) - Number(b.precio));
     }
 
     if(orden === "precioDesc"){
-        lista.sort((a,b)=> b.precio - a.precio);
+        lista.sort((a,b) => Number(b.precio) - Number(a.precio));
     }
 
-
-    // NUEVOS (por ID)
+    // NUEVOS
     if(orden === "nuevos"){
-        lista.sort((a,b)=> b.id - a.id);
+        lista.sort((a,b) => Number(b.id) - Number(a.id));
     }
 
-
-    // render final
-    renderProductos(lista);
+    return lista;
 }
+
+window.aplicarFiltros = function(){
+
+    if(!productosGlobal || productosGlobal.length === 0){
+        return;
+    }
+
+    let lista = [...productosGlobal];
+
+    const selectOrden = document.getElementById("orden");
+    const selectCategoria = document.getElementById("categoria");
+
+    if(!selectOrden || !selectCategoria){
+        renderProductos(lista);
+        return;
+    }
+
+    const orden = selectOrden.value;
+    const categoria = selectCategoria.value;
+
+    localStorage.setItem("filtro_orden", orden);
+    localStorage.setItem("filtro_categoria", categoria);
+
+    if(categoria !== "todos"){
+        lista = lista.filter(p =>
+            String(p.categoria).trim().toLowerCase() ===
+            String(categoria).trim().toLowerCase()
+        );
+    }
+
+    if(orden === "az"){
+        lista.sort((a,b) => a.nombre.localeCompare(b.nombre));
+    }
+
+    if(orden === "za"){
+        lista.sort((a,b) => b.nombre.localeCompare(a.nombre));
+    }
+
+    if(orden === "precioAsc"){
+        lista.sort((a,b) => Number(a.precio) - Number(b.precio));
+    }
+
+    if(orden === "precioDesc"){
+        lista.sort((a,b) => Number(b.precio) - Number(a.precio));
+    }
+
+    if(orden === "nuevos"){
+        lista.sort((a,b) => Number(b.id) - Number(a.id));
+    }
+
+    renderProductos(lista);
+};
+
 /* ==============================
 ESCAPE HTML
 ============================== */
@@ -362,9 +459,43 @@ window.mostrarProducto = function(id){
                 producto.stock,
                 producto.imagen
             );
+
+            cargarCarrito();
         }
+
     });
 }
+
+window.ordenarProductoInicio = function(id){
+
+    if(productosGlobal.length > 0){
+        window.mostrarProducto(id);
+        return;
+    }
+
+    fetch(API + "/productos")
+    .then(res => {
+        if (!res.ok) throw new Error("Error en la API");
+        return res.json();
+    })
+    .then(productos => {
+
+        productosGlobal = productos;
+
+        productos.forEach(p => {
+            mapaProductos[p.id] = p.nombre;
+        });
+
+        window.mostrarProducto(id);
+
+    })
+    .catch(err => {
+        console.error("Error cargando producto desde inicio:", err);
+        Swal.fire("No se pudo cargar el producto");
+    });
+}
+
+
 
 /* ==============================
 AGREGAR CARRITO
@@ -414,9 +545,8 @@ crear carrito global
 
 function crearCarritoGlobal(){
 
-    if(document.getElementById("sidebar-carrito")){
-        return;
-    }
+    document.getElementById("sidebar-carrito")?.remove();
+    document.getElementById("overlay-carrito")?.remove();
 
     const overlay = document.createElement("div");
 
@@ -701,6 +831,122 @@ function generarTarjetaSimulada(){
 }
 
 /* ==============================
+VALIDAR STOCK REAL ANTES DE PAGAR
+============================== */
+
+async function validarCarritoConStockActual(){
+
+    let carrito = obtenerCarrito();
+
+    if(carrito.length === 0){
+
+        Swal.fire(
+            "Carrito vacío",
+            "No tienes productos en el carrito.",
+            "warning"
+        );
+
+        return false;
+    }
+
+    try{
+
+        const res = await fetch(API + "/productos");
+
+        if(!res.ok){
+            throw new Error("No se pudo consultar el stock actual");
+        }
+
+        const productosActuales = await res.json();
+
+        let carritoActualizado = [];
+        let huboCambios = false;
+
+        carrito.forEach(item => {
+
+            const productoActual = productosActuales.find(
+                p => Number(p.id) === Number(item.id)
+            );
+
+            if(!productoActual){
+
+                huboCambios = true;
+                return;
+            }
+
+            const stockDisponible = Number(productoActual.stock);
+
+            if(stockDisponible <= 0){
+
+                huboCambios = true;
+                return;
+            }
+
+            if(Number(item.cantidad) > stockDisponible){
+
+                item.cantidad = stockDisponible;
+                item.stock = stockDisponible;
+                huboCambios = true;
+
+            }else{
+
+                item.stock = stockDisponible;
+            }
+
+            carritoActualizado.push(item);
+        });
+
+        guardarCarrito(carritoActualizado);
+
+        productosGlobal = productosActuales;
+
+        cargarCarrito();
+
+        const container = document.getElementById("productos-container");
+
+        if(container){
+            renderProductos(productosGlobal);
+        }
+
+        if(carritoActualizado.length === 0){
+
+            Swal.fire(
+                "Sin stock",
+                "Los productos de tu carrito ya no están disponibles.",
+                "warning"
+            );
+
+            return false;
+        }
+
+        if(huboCambios){
+
+            Swal.fire(
+                "Carrito actualizado",
+                "Algunos productos cambiaron porque otra persona compró antes. Ajustamos tu carrito al stock disponible.",
+                "info"
+            );
+
+            return false;
+        }
+
+        return true;
+
+    }catch(error){
+
+        console.error("Error validando stock:", error);
+
+        Swal.fire(
+            "Error de conexión",
+            "No se pudo revisar el stock actual antes del pago. Intenta de nuevo.",
+            "error"
+        );
+
+        return false;
+    }
+}
+
+/* ==============================
 PAGO
 ============================== */
 
@@ -736,6 +982,9 @@ window.mostrarPago = function () {
 
         return;
     }
+
+carrito = obtenerCarrito();
+
 
     const tarjetaSimulada = generarTarjetaSimulada();
 
@@ -1003,6 +1252,12 @@ async function procesarPago() {
         return;
     }
 
+    const carritoValido = await validarCarritoConStockActual();
+
+    if(!carritoValido){
+        return;
+    }
+
     let carrito = obtenerCarrito();
 
     const usuario = user.email;
@@ -1021,35 +1276,29 @@ async function procesarPago() {
     try {
 
         // 1. PROCESAR COMPRA EN BACKEND
-        const respuestas = await Promise.all(
+        const resCompra = await fetch(API + "/comprar-carrito", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+            usuario: usuario,
+            items: carrito.map(producto => ({
+            id: producto.id,
+            nombre: producto.nombre,
+            precio: producto.precio,
+            cantidad: producto.cantidad
+        }))
+    })
+});
+if (!resCompra.ok) {
+    const errorData = await resCompra.json();
+    throw new Error(errorData.detail || "Error al procesar la compra");
+}
+const compra = await resCompra.json();
 
-            carrito.map(async producto => {
+console.log("Compra realizada:", compra);
 
-                const res = await fetch(API + "/comprar", {
-
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        id: producto.id,
-                        cantidad: producto.cantidad,
-                        usuario: usuario,
-                        estado: "preparando"
-                    })
-                });
-
-                if (!res.ok) {
-                    throw new Error("Error al comprar producto");
-                }
-
-                return await res.json();
-            })
-        );
-
-        console.log("Respuestas compra:", respuestas);
 
         // 2. INTENTAR ENVIAR TICKET, PERO SIN ROMPER LA COMPRA
         let correoEnviado = false;
@@ -1091,7 +1340,7 @@ async function procesarPago() {
         // 3. LIMPIAR CARRITO
         localStorage.removeItem("carrito");
 
-        cargarCarrito();
+        await refrescarProductos();
 
         // 4. MENSAJE FINAL
         if (correoEnviado) {
@@ -1126,6 +1375,194 @@ async function procesarPago() {
 /* ==============================
 HISTORIAL
 ============================== */
+
+async function cargarPedidosCliente() {
+    const contenedor = document.getElementById("contenedor-pedidos-cliente");
+
+    if (!contenedor) return;
+
+    const usuario = localStorage.getItem("usuario") || "cliente_demo";
+
+    try {
+        const respuesta = await fetch(API + "/pedidos/cliente/" + encodeURIComponent(usuario));
+        const pedidos = await respuesta.json();
+
+        contenedor.innerHTML = "";
+
+        if (!pedidos.length) {
+            contenedor.innerHTML = `
+                <p class="text-gray-500 text-center">
+                    Aún no tienes compras registradas.
+                </p>
+            `;
+            return;
+        }
+
+        pedidos.forEach(pedido => {
+            contenedor.innerHTML += crearCardPedidoCliente(pedido);
+        });
+
+    } catch (error) {
+        console.error("Error al cargar pedidos del cliente:", error);
+        contenedor.innerHTML = `
+            <p class="text-red-500 text-center">
+                No se pudieron cargar tus pedidos.
+            </p>
+        `;
+    }
+}
+
+function crearCardPedidoCliente(pedido) {
+    const porcentaje = obtenerPorcentajeEstado(pedido.estado);
+
+    const productos = pedido.items.map(item => `
+        <li class="text-sm text-gray-600">
+            ${item.cantidad} x ${item.nombre} - $${item.subtotal}
+        </li>
+    `).join("");
+
+    return `
+        <div class="bg-white rounded-2xl shadow p-5 mb-5 border">
+            <div class="flex justify-between items-center mb-3">
+                <div>
+                    <h3 class="font-bold text-lg">Pedido ${pedido._id}</h3>
+                    <p class="text-sm text-gray-500">
+                        Total: $${pedido.total}
+                    </p>
+                </div>
+
+                <span class="px-3 py-1 rounded-full text-sm font-bold ${obtenerClaseEstado(pedido.estado)}">
+                    ${pedido.estado}
+                </span>
+            </div>
+
+            <ul class="mb-4">
+                ${productos}
+            </ul>
+
+            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden mb-2">
+                <div 
+                    class="h-4 rounded-full transition-all duration-700 ${pedido.estado === "Rechazado" ? "bg-red-400" : "bg-cyan-400"}"
+                    style="width: ${porcentaje}%;">
+                </div>
+            </div>
+
+            <div class="flex justify-between text-xs text-gray-500 font-semibold">
+                <span>En preparación</span>
+                <span>En camino</span>
+                <span>Entregado</span>
+            </div>
+
+            ${
+                pedido.estado === "Rechazado"
+                    ? `<p class="mt-3 text-sm text-red-500 font-semibold">
+                        Motivo: ${pedido.motivo_rechazo || "Compra rechazada por administración"}
+                       </p>`
+                    : ""
+            }
+        </div>
+    `;
+}
+
+function obtenerPorcentajeEstado(estado) {
+    if (estado === "En preparación") return 33;
+    if (estado === "En camino") return 66;
+    if (estado === "Entregado") return 100;
+    if (estado === "Rechazado") return 100;
+    return 0;
+}
+
+function obtenerClaseEstado(estado) {
+    if (estado === "En preparación") return "bg-yellow-100 text-yellow-700";
+    if (estado === "En camino") return "bg-blue-100 text-blue-700";
+    if (estado === "Entregado") return "bg-green-100 text-green-700";
+    if (estado === "Rechazado") return "bg-red-100 text-red-700";
+    return "bg-gray-100 text-gray-700";
+}
+
+function crearCardPedidoAdmin(pedido) {
+    const productos = pedido.items.map(item => `
+        <li class="text-sm text-gray-600">
+            ${item.cantidad} x ${item.nombre} - $${item.subtotal}
+        </li>
+    `).join("");
+
+    return `
+        <div class="bg-white rounded-2xl shadow p-5 mb-5 border">
+            <div class="flex justify-between items-center mb-3">
+                <div>
+                    <h3 class="font-bold text-lg">Pedido ${pedido._id}</h3>
+                    <p class="text-sm text-gray-500">Cliente: ${pedido.usuario}</p>
+                    <p class="text-sm text-gray-500">Total: $${pedido.total}</p>
+                </div>
+
+                <span class="px-3 py-1 rounded-full text-sm font-bold ${obtenerClaseEstado(pedido.estado)}">
+                    ${pedido.estado}
+                </span>
+            </div>
+
+            <ul class="mb-4">
+                ${productos}
+            </ul>
+
+            <div class="flex gap-2 flex-wrap">
+                <button onclick="actualizarEstadoPedido('${pedido._id}', 'En preparación')"
+                    class="px-3 py-2 rounded-xl bg-yellow-100 text-yellow-700 font-bold">
+                    En preparación
+                </button>
+
+                <button onclick="actualizarEstadoPedido('${pedido._id}', 'En camino')"
+                    class="px-3 py-2 rounded-xl bg-blue-100 text-blue-700 font-bold">
+                    En camino
+                </button>
+
+                <button onclick="actualizarEstadoPedido('${pedido._id}', 'Entregado')"
+                    class="px-3 py-2 rounded-xl bg-green-100 text-green-700 font-bold">
+                    Entregado
+                </button>
+
+                <button onclick="rechazarPedido('${pedido._id}')"
+                    class="px-3 py-2 rounded-xl bg-red-100 text-red-700 font-bold">
+                    Rechazar
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+async function rechazarPedido(pedidoId) {
+    const motivo = prompt("Escribe el motivo del rechazo:");
+
+    if (motivo === null) return;
+
+    try {
+        const respuesta = await fetch(API + "/admin/pedidos/" + pedidoId + "/estado", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                estado: "Rechazado",
+                motivo_rechazo: motivo || "Compra rechazada por administración"
+            })
+        });
+
+        const data = await respuesta.json();
+
+        if (!respuesta.ok) {
+            alert(data.detail || "No se pudo rechazar el pedido");
+            return;
+        }
+
+        alert("Pedido rechazado");
+        cargarPedidos();
+
+    } catch (error) {
+        console.error("Error al rechazar pedido:", error);
+        alert("Error al rechazar el pedido");
+    }
+}
+
 
 window.irHistorial = function(){
 window.location.href="historial.html";

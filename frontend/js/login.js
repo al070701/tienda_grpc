@@ -1,109 +1,268 @@
 import { auth } from "./firebase.js";
 
 import {
-createUserWithEmailAndPassword,
-signInWithEmailAndPassword,
-GoogleAuthProvider,
-signInWithPopup,
-sendPasswordResetEmail,
-sendEmailVerification,
-onAuthStateChanged,
-signOut
-}
-from
-"https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    GoogleAuthProvider,
+    signInWithPopup,
+    sendPasswordResetEmail,
+    sendEmailVerification,
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
-function fusionarCarritoInvitadoConUsuario(user){
-
-    if(!user || !user.email){
-        return;
-    }
-
-    const claveInvitado = "carrito_invitado";
-    const claveUsuario = "carrito_" + user.email;
-
-    const carritoInvitado =
-        JSON.parse(localStorage.getItem(claveInvitado)) || [];
-
-    const carritoUsuario =
-        JSON.parse(localStorage.getItem(claveUsuario)) || [];
-
-    if(carritoInvitado.length === 0){
-        return;
-    }
-
-    carritoInvitado.forEach(productoInvitado => {
-
-        const productoExistente = carritoUsuario.find(
-            productoUsuario =>
-                Number(productoUsuario.id) === Number(productoInvitado.id)
-        );
-
-        if(productoExistente){
-
-            const cantidadNueva =
-                productoExistente.cantidad + productoInvitado.cantidad;
-
-            const stockDisponible =
-                productoExistente.stock || productoInvitado.stock || cantidadNueva;
-
-            productoExistente.cantidad = Math.min(
-                cantidadNueva,
-                stockDisponible
-            );
-
-        }else{
-
-            carritoUsuario.push(productoInvitado);
-        }
-    });
-
-    localStorage.setItem(
-        claveUsuario,
-        JSON.stringify(carritoUsuario)
-    );
-
-    localStorage.removeItem(claveInvitado);
-}
 
 /* ==============================
-REGISTRAR
+    UTILIDADES
+============================== */
+
+function obtenerCorreo(){
+    return document.getElementById("correo").value.trim();
+}
+
+function obtenerPassword(){
+    return document.getElementById("password").value;
+}
+
+function mostrarAlerta(titulo, mensaje, icono = "warning"){
+    Swal.fire(
+        titulo,
+        mensaje,
+        icono
+    );
+}
+
+function redirigirDespuesDeLogin(){
+    const params = new URLSearchParams(window.location.search);
+    const paginaVolver = params.get("volver") || "tienda.html";
+
+    window.location.href = paginaVolver;
+}
+
+function validarCorreo(correo){
+
+    if(!correo){
+        mostrarAlerta(
+            "Correo vacío",
+            "Escribe tu correo electrónico antes de continuar."
+        );
+
+        return false;
+    }
+
+    const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if(!formatoCorreo.test(correo)){
+        mostrarAlerta(
+            "Correo inválido",
+            "Escribe un correo válido. Ejemplo: ejemplo@correo.com"
+        );
+
+        return false;
+    }
+
+    return true;
+}
+
+function validarPasswordRegistro(password){
+
+    if(!password){
+        mostrarAlerta(
+            "Contraseña vacía",
+            "Escribe una contraseña antes de crear tu cuenta."
+        );
+
+        return false;
+    }
+
+    if(password.length < 8){
+        mostrarAlerta(
+            "Contraseña muy corta",
+            "La contraseña debe tener mínimo 8 caracteres."
+        );
+
+        return false;
+    }
+
+    if(!/[A-Za-zÁÉÍÓÚáéíóúÑñ]/.test(password)){
+        mostrarAlerta(
+            "Contraseña sin letra",
+            "La contraseña debe tener al menos una letra."
+        );
+
+        return false;
+    }
+
+    if(!/\d/.test(password)){
+        mostrarAlerta(
+            "Contraseña sin número",
+            "La contraseña debe tener al menos un número."
+        );
+
+        return false;
+    }
+
+    return true;
+}
+
+function validarPasswordLogin(password){
+
+    if(!password){
+        mostrarAlerta(
+            "Contraseña vacía",
+            "Escribe tu contraseña para iniciar sesión."
+        );
+
+        return false;
+    }
+
+    return true;
+}
+
+function manejarErrorFirebase(error, contexto = "general"){
+
+    console.log("ERROR FIREBASE:", error.code, error.message);
+
+    if(error.code === "auth/invalid-email"){
+        mostrarAlerta(
+            "Correo inválido",
+            "El formato del correo no es correcto. Revisa que esté bien escrito."
+        );
+        return;
+    }
+
+    if(error.code === "auth/email-already-in-use"){
+        mostrarAlerta(
+            "Correo ya registrado",
+            "Ya existe una cuenta con ese correo. Intenta iniciar sesión."
+        );
+        return;
+    }
+
+    if(error.code === "auth/weak-password"){
+        mostrarAlerta(
+            "Contraseña débil",
+            "La contraseña es muy débil. Usa mínimo 8 caracteres, letras y números."
+        );
+        return;
+    }
+
+    if(error.code === "auth/user-not-found"){
+        mostrarAlerta(
+            "Cuenta no encontrada",
+            "No existe una cuenta registrada con ese correo."
+        );
+        return;
+    }
+
+    if(error.code === "auth/wrong-password"){
+        mostrarAlerta(
+            "Contraseña incorrecta",
+            "La contraseña que escribiste no coincide con esa cuenta."
+        );
+        return;
+    }
+
+    if(error.code === "auth/invalid-credential"){
+        mostrarAlerta(
+            "Datos incorrectos",
+            "El correo o la contraseña son incorrectos. Revisa tus datos e intenta de nuevo."
+        );
+        return;
+    }
+
+    if(error.code === "auth/missing-password"){
+        mostrarAlerta(
+            "Contraseña vacía",
+            "Escribe tu contraseña antes de continuar."
+        );
+        return;
+    }
+
+    if(error.code === "auth/too-many-requests"){
+        mostrarAlerta(
+            "Demasiados intentos",
+            "Firebase bloqueó temporalmente el acceso por demasiados intentos fallidos. Espera unos minutos e intenta de nuevo."
+        );
+        return;
+    }
+
+    if(error.code === "auth/popup-closed-by-user"){
+        mostrarAlerta(
+            "Inicio cancelado",
+            "Cerraste la ventana de Google antes de completar el inicio de sesión."
+        );
+        return;
+    }
+
+    if(error.code === "auth/cancelled-popup-request"){
+        mostrarAlerta(
+            "Ventana cancelada",
+            "Se abrió otra ventana de inicio de sesión. Intenta de nuevo."
+        );
+        return;
+    }
+
+    if(error.code === "auth/popup-blocked"){
+        mostrarAlerta(
+            "Ventana bloqueada",
+            "El navegador bloqueó la ventana de Google. Permite ventanas emergentes para esta página."
+        );
+        return;
+    }
+
+    if(error.code === "auth/unauthorized-domain"){
+        mostrarAlerta(
+            "Dominio no autorizado",
+            "Firebase no permite iniciar sesión desde esta dirección. Agrega tu localhost o IP de Radmin en Firebase Authentication > Settings > Authorized domains."
+        );
+        return;
+    }
+
+    if(error.code === "auth/network-request-failed"){
+        mostrarAlerta(
+            "Error de conexión",
+            "No se pudo conectar con Firebase. Revisa tu internet o si estás usando una IP/local diferente."
+        );
+        return;
+    }
+
+    if(contexto === "recuperar"){
+        mostrarAlerta(
+            "No se pudo enviar el correo",
+            "Revisa que el correo esté bien escrito o que exista una cuenta con ese correo.",
+            "error"
+        );
+        return;
+    }
+
+    mostrarAlerta(
+        "Error inesperado",
+        "Ocurrió un error no identificado: " + error.message,
+        "error"
+    );
+}
+
+
+/* ==============================
+    REGISTRAR
 ============================== */
 
 window.registrar = async function(){
 
-    const correo =
-    document.getElementById("correo").value;
+    const correo = obtenerCorreo();
+    const password = obtenerPassword();
 
-    const password =
-    document.getElementById("password").value;
-
-    if(password.length !== 8){
-
-        Swal.fire(
-            "Contraseña inválida",
-            "La contraseña debe tener exactamente 8 caracteres",
-            "warning"
-        );
-
+    if(!validarCorreo(correo)){
         return;
     }
 
-    if(!/\d/.test(password)){
-
-        Swal.fire(
-            "Contraseña inválida",
-            "La contraseña debe tener al menos un número",
-            "warning"
-        );
-
+    if(!validarPasswordRegistro(password)){
         return;
     }
 
     try{
 
-        const credenciales =
-        await createUserWithEmailAndPassword(
+        const credenciales = await createUserWithEmailAndPassword(
             auth,
             correo,
             password
@@ -115,39 +274,38 @@ window.registrar = async function(){
 
         await signOut(auth);
 
-
         Swal.fire({
-            icon:"info",
-            title:"Verifica tu correo",
-            text:"Te enviamos un enlace para activar tu cuenta antes de iniciar sesión"
+            icon: "info",
+            title: "Verifica tu correo",
+            text: "Te enviamos un enlace para activar tu cuenta. Debes verificar tu correo antes de iniciar sesión."
         });
 
     }catch(error){
-
-        Swal.fire(
-            "Error",
-            error.message,
-            "error"
-        );
+        manejarErrorFirebase(error, "registro");
     }
-}
+};
+
 
 /* ==============================
-LOGIN
+    LOGIN
 ============================== */
 
 window.login = async function(){
 
-    const correo =
-    document.getElementById("correo").value;
+    const correo = obtenerCorreo();
+    const password = obtenerPassword();
 
-    const password =
-    document.getElementById("password").value;
+    if(!validarCorreo(correo)){
+        return;
+    }
+
+    if(!validarPasswordLogin(password)){
+        return;
+    }
 
     try{
 
-        const credenciales =
-        await signInWithEmailAndPassword(
+        const credenciales = await signInWithEmailAndPassword(
             auth,
             correo,
             password
@@ -159,123 +317,65 @@ window.login = async function(){
 
             Swal.fire(
                 "Correo no verificado",
-                "Revisa tu correo y activa tu cuenta",
+                "Revisa tu correo y activa tu cuenta antes de iniciar sesión.",
                 "warning"
             );
 
             return;
         }
 
-        // fusionarCarritoInvitadoConUsuario(
-        //     credenciales.user
-        // );
-
         Swal.fire({
-            icon:"success",
-            title:"Inicio de sesión exitoso",
-            text:"Tu cuenta fue activada correctamente"
-        }).then(()=>{
-            
-            const params =
-            new URLSearchParams(window.location.search);
-            
-            const paginaVolver =
-            params.get("volver") || "tienda.html";
-            window.location.href = paginaVolver;
+            icon: "success",
+            title: "Inicio de sesión exitoso",
+            text: "Bienvenido a Rellenitos."
+        }).then(() => {
+            redirigirDespuesDeLogin();
         });
 
     }catch(error){
-
-        if(error.code === "auth/user-not-found"){
-
-            Swal.fire(
-                "Correo no existente",
-                "No existe una cuenta con ese correo",
-                "warning"
-            );
-
-            return;
-        }
-
-        if(error.code === "auth/wrong-password"){
-
-            Swal.fire(
-                "Contraseña incorrecta",
-                "La contraseña ingresada no es válida",
-                "warning"
-            );
-
-            return;
-        }
-
-        if(error.code === "auth/invalid-credential"){
-
-            Swal.fire(
-                "Datos inválidos",
-                "Correo o contraseña incorrectos",
-                "warning"
-            );
-
-            return;
-        }
-
-        Swal.fire(
-            "Error",
-            error.message,
-            "error"
-        );
+        manejarErrorFirebase(error, "login");
     }
-}
+};
+
 
 /* ==============================
-GOOGLE LOGIN
+    GOOGLE LOGIN
 ============================== */
 
 window.loginGoogle = async function(){
 
     try{
 
-        const provider =
-        new GoogleAuthProvider();
+        const provider = new GoogleAuthProvider();
 
-        const result =
         await signInWithPopup(
             auth,
             provider
         );
 
-        // // fusionarCarritoInvitadoConUsuario(result.user);
-
-        window.location.href =
-        "tienda.html";
+        Swal.fire({
+            icon: "success",
+            title: "Inicio con Google exitoso",
+            text: "Bienvenido a Rellenitos."
+        }).then(() => {
+            redirigirDespuesDeLogin();
+        });
 
     }catch(error){
-
-        Swal.fire(
-            "Error",
-            error.message,
-            "error"
-        );
+        manejarErrorFirebase(error, "google");
     }
-}
+};
+
 
 /* ==============================
-RECUPERAR PASSWORD
+    RECUPERAR CONTRASEÑA
 ============================== */
 
 window.recuperarPassword = async function(){
 
-    const correo =
-    document.getElementById("correo").value;
+    const correo = obtenerCorreo();
 
-    if(!correo){
-
-        Swal.fire(
-            "Error",
-            "Escribe tu correo",
-            "warning"
-        );
-
+    if(!validarCorreo(correo)){
         return;
     }
 
@@ -288,31 +388,28 @@ window.recuperarPassword = async function(){
 
         Swal.fire(
             "Correo enviado",
-            "Revisa tu bandeja de entrada",
+            "Revisa tu bandeja de entrada para restablecer tu contraseña.",
             "success"
         );
 
     }catch(error){
-
-        Swal.fire(
-            "Error",
-            error.message,
-            "error"
-        );
+        manejarErrorFirebase(error, "recuperar");
     }
-}
+};
+
+
+/* ==============================
+    VOLVER
+============================== */
 
 window.volverAnterior = function(){
 
-    const params =
-        new URLSearchParams(window.location.search);
-
-    const paginaVolver =
-        params.get("volver");
+    const params = new URLSearchParams(window.location.search);
+    const paginaVolver = params.get("volver");
 
     if(paginaVolver){
         window.location.href = paginaVolver;
     }else{
         window.location.href = "index.html";
     }
-}
+};

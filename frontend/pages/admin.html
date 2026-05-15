@@ -4,37 +4,74 @@
 <head>
 <meta charset="UTF-8">
 <title>Administrador</title>
+<link rel="icon" type="image/x-icon" href="../assets/logo_azul.png">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
 
 body{
-background:#f5f7fa;
+    background:#f5f7fa;
 }
 
 h1{
-margin-bottom:30px;
-font-weight:600;
+    margin-bottom:30px;
+    font-weight:600;
 }
 
 .card{
-border:none;
-border-radius:12px;
-box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    border:none;
+    border-radius:12px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
 }
 
 table img{
-border-radius:6px;
+    border-radius:6px;
 }
 
 thead{
-background:#212529;
-color:white;
+    background:#212529;
+    color:white;
 }
 
 button{
-border-radius:8px;
+    border-radius:8px;
+}
+
+.badge-estado{
+    padding:8px 12px;
+    border-radius:20px;
+    font-weight:bold;
+    font-size:13px;
+}
+
+.estado-preparacion{
+    background:#fff3cd;
+    color:#856404;
+}
+
+.estado-camino{
+    background:#cfe2ff;
+    color:#084298;
+}
+
+.estado-entregado{
+    background:#d1e7dd;
+    color:#0f5132;
+}
+
+.estado-rechazado{
+    background:#f8d7da;
+    color:#842029;
+}
+
+.producto-item{
+    font-size:14px;
+    margin-bottom:4px;
+}
+
+textarea{
+    resize:none;
 }
 
 </style>
@@ -45,122 +82,176 @@ border-radius:8px;
 
 <div class="container mt-4">
 
-<h1 class="text-center">⚙ Panel de Administrador</h1>
+    <h1 class="text-center">⚙ Panel de Administrador</h1>
 
-<div class="text-center mb-4">
-<button class="btn btn-primary" onclick="cargarProductos()">Actualizar lista</button>
-</div>
+    <div class="text-center mb-4">
+        <button class="btn btn-primary" onclick="cargarProductos()">
+            Actualizar productos
+        </button>
 
-<!-- ===============================
-AGREGAR PRODUCTO
-=============================== -->
+        <button class="btn btn-dark" onclick="cargarPedidos()">
+            Actualizar pedidos
+        </button>
+    </div>
 
-<div class="card p-4 mb-4">
+    <!-- ===============================
+    AGREGAR PRODUCTO
+    =============================== -->
 
-<h4>Agregar Producto</h4>
+    <div class="card p-4 mb-4">
 
-<div class="row g-3">
+        <h4>Agregar Producto</h4>
 
-<div class="col-md-3">
-<input class="form-control" id="nombre" placeholder="Nombre">
-</div>
+        <div class="row g-3">
 
-<div class="col-md-2">
-<input class="form-control" id="precio" placeholder="Precio">
-</div>
+            <div class="col-md-3">
+                <input class="form-control" id="nombre" placeholder="Nombre">
+            </div>
 
-<div class="col-md-2">
-<input class="form-control" id="stock" placeholder="Stock">
-</div>
+            <div class="col-md-2">
+                <input class="form-control" id="precio" type="number" placeholder="Precio">
+            </div>
 
-<div class="col-md-2">
-<input class="form-control" id="categoria" placeholder="Categoria">
-</div>
+            <div class="col-md-2">
+                <input class="form-control" id="stock" type="number" placeholder="Stock">
+            </div>
 
-<div class="col-md-4">
-<input class="form-control" id="descripcion" placeholder="Descripcion">
-</div>
+            <div class="col-md-2">
+                <input class="form-control" id="categoria" placeholder="Categoría">
+            </div>
 
-<div class="col-md-3">
-<input class="form-control" type="file" id="imagen">
-</div>
+            <div class="col-md-6">
+                <textarea class="form-control" id="descripcion" rows="2" placeholder="Descripción"></textarea>
+            </div>
 
-<div class="col-md-2">
-<button class="btn btn-success w-100" onclick="agregarProducto()">Agregar</button>
-</div>
+            <div class="col-md-3">
+                <input class="form-control" type="file" id="imagen" accept="image/*">
+            </div>
 
-</div>
+            <div class="col-md-2">
+                <button class="btn btn-success w-100" onclick="agregarProducto()">
+                    Agregar
+                </button>
+            </div>
 
-</div>
+        </div>
 
-<!-- ===============================
+    </div>
+
+    <!-- ===============================
+    PRODUCTOS
+    =============================== -->
+
+    <!-- ===============================
 PRODUCTOS
 =============================== -->
 
 <div class="card p-4 mb-4">
 
-<h4>Productos</h4>
+    <h4>Productos</h4>
 
-<div class="table-responsive">
+    <div class="table-responsive">
 
-<table class="table table-striped align-middle">
+        <table class="table table-striped align-middle">
 
-<thead>
-<tr>
-<th>ID</th>
-<th>Nombre</th>
-<th>Precio</th>
-<th>Stock</th>
-<th>Imagen</th>
-<th>Acciones</th>
-</tr>
-</thead>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Categoría</th>
+                    <th>Descripción</th>
+                    <th>Imagen</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
 
-<tbody id="tablaProductos"></tbody>
+            <tbody id="tablaProductos"></tbody>
 
-</table>
+        </table>
 
-</div>
-
-</div>
-
-<!-- ===============================
-HISTORIAL
-=============================== -->
-
-<div class="card p-4">
-
-<h4>Historial de Pedidos</h4>
-
-<div class="table-responsive">
-
-<table class="table table-striped align-middle">
-
-<thead>
-<tr>
-<th>ID</th>
-<th>Usuario</th>
-<th>Producto</th>
-<th>Cantidad</th>
-<th>Estado</th>
-<th>Acción</th>
-</tr>
-</thead>
-
-<tbody id="tablaHistorial"></tbody>
-
-</table>
+    </div>
 
 </div>
 
-</div>
+    <!-- ===============================
+    HISTORIAL / PEDIDOS
+    =============================== -->
+
+    <div class="card p-4 mb-5">
+
+        <h4>Historial de Pedidos</h4>
+
+        <div class="table-responsive">
+
+            <table class="table table-striped align-middle">
+
+                <thead>
+                    <tr>
+                        <th>ID Pedido</th>
+                        <th>Cliente</th>
+                        <th>Productos</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Motivo rechazo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tablaPedidos"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
 
 </div>
 
 
 <script>
 
-const API = "http://26.145.132.10:8000"
+const API = "http://26.145.132.10:8000";
+
+/* ===============================
+UTILIDADES
+=============================== */
+
+function limpiarTexto(texto){
+
+    if(texto === undefined || texto === null){
+        return "";
+    }
+
+    return String(texto)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function claseEstado(estado){
+
+    if(estado === "En preparación"){
+        return "estado-preparacion";
+    }
+
+    if(estado === "En camino"){
+        return "estado-camino";
+    }
+
+    if(estado === "Entregado"){
+        return "estado-entregado";
+    }
+
+    if(estado === "Rechazado"){
+        return "estado-rechazado";
+    }
+
+    return "estado-preparacion";
+}
 
 /* ===============================
 PRODUCTOS
@@ -168,227 +259,446 @@ PRODUCTOS
 
 async function cargarProductos(){
 
-let res = await fetch(API + "/productos")
-let productos = await res.json()
+    try{
 
-let tabla = document.getElementById("tablaProductos")
-tabla.innerHTML=""
+        let res = await fetch(API + "/productos");
 
-productos.forEach(p=>{
+        if(!res.ok){
+            throw new Error("No se pudieron cargar los productos");
+        }
 
-tabla.innerHTML += `
-<tr>
+        let productos = await res.json();
 
-<td>${p.id}</td>
+        let tabla = document.getElementById("tablaProductos");
 
-<td>
-<input class="form-control mb-1" id="nombre-${p.id}" value="${p.nombre}">
-<button class="btn btn-sm btn-primary" onclick="cambiarNombre(${p.id})">Cambiar</button>
-</td>
+        tabla.innerHTML = "";
 
-<td>
-<input class="form-control mb-1" id="precio-${p.id}" value="${p.precio}">
-<button class="btn btn-sm btn-primary" onclick="cambiarPrecio(${p.id})">Cambiar</button>
-</td>
+        productos.forEach(p=>{
 
-<td>
-<input class="form-control mb-1" id="stock-${p.id}" value="${p.stock}">
-<button class="btn btn-sm btn-primary" onclick="cambiarStock(${p.id})">Cambiar</button>
-</td>
+            tabla.innerHTML += `
+            <tr>
 
-<td>
-<img src="http://26.145.132.10:8000/images/${p.imagen}" width="60"><br>
-<button class="btn btn-sm btn-secondary mt-1" onclick="cambiarImagen(${p.id})">Cambiar imagen</button>
-</td>
+                <td>${p.id}</td>
 
-<td>
-<button class="btn btn-sm btn-danger" onclick="eliminarProducto(${p.id})">Eliminar</button>
-</td>
+                <td style="min-width:180px;">
+                    <input class="form-control mb-1" id="nombre-${p.id}" value="${limpiarTexto(p.nombre)}">
+                    <button class="btn btn-sm btn-primary" onclick="cambiarNombre(${p.id})">
+                        Cambiar
+                    </button>
+                </td>
 
-</tr>
-`
-})
+                <td style="min-width:120px;">
+                    <input class="form-control mb-1" type="number" id="precio-${p.id}" value="${p.precio}">
+                    <button class="btn btn-sm btn-primary" onclick="cambiarPrecio(${p.id})">
+                        Cambiar
+                    </button>
+                </td>
+
+                <td style="min-width:120px;">
+                    <input class="form-control mb-1" type="number" id="stock-${p.id}" value="${p.stock}">
+                    <button class="btn btn-sm btn-primary" onclick="cambiarStock(${p.id})">
+                        Cambiar
+                    </button>
+                </td>
+
+                <td style="min-width:150px;">
+                    <input class="form-control mb-1" id="categoria-${p.id}" value="${limpiarTexto(p.categoria || "todos")}">
+                    <button class="btn btn-sm btn-primary" onclick="cambiarCategoria(${p.id})">
+                        Cambiar
+                    </button>
+                </td>
+
+                <td style="min-width:250px;">
+                    <textarea class="form-control mb-1" rows="2" id="descripcion-${p.id}">${limpiarTexto(p.descripcion || "")}</textarea>
+                    <button class="btn btn-sm btn-primary" onclick="cambiarDescripcion(${p.id})">
+                        Cambiar
+                    </button>
+                </td>
+
+                <td style="min-width:110px;">
+                    <img src="${API}/images/${limpiarTexto(p.imagen)}" width="70" height="70" style="object-fit:contain;"><br>
+                    <button class="btn btn-sm btn-secondary mt-1" onclick="cambiarImagen(${p.id})">
+                        Cambiar
+                    </button>
+                </td>
+
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarProducto(${p.id})">
+                        Eliminar
+                    </button>
+                </td>
+
+            </tr>
+            `;
+
+        });
+
+    }catch(error){
+
+        console.error(error);
+        alert("Error al cargar productos");
+
+    }
 
 }
 
 async function cambiarStock(id){
 
-let stock = document.getElementById("stock-"+id).value
+    let stock = document.getElementById("stock-" + id).value;
 
-await fetch(API+"/admin/stock",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-id:parseInt(id),
-stock:parseInt(stock)
-})
-})
+    await fetch(API + "/admin/stock", {
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            id:parseInt(id),
+            stock:parseInt(stock)
+        })
+    });
 
-cargarProductos()
-
+    cargarProductos();
 }
 
 async function cambiarPrecio(id){
 
-let precio = document.getElementById("precio-"+id).value
+    let precio = document.getElementById("precio-" + id).value;
 
-await fetch(API+"/admin/precio",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-id:parseInt(id),
-precio:parseInt(precio)
-})
-})
+    await fetch(API + "/admin/precio", {
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            id:parseInt(id),
+            precio:parseFloat(precio)
+        })
+    });
 
-cargarProductos()
-
+    cargarProductos();
 }
 
 async function cambiarNombre(id){
 
-let nombre = document.getElementById("nombre-"+id).value
+    let nombre = document.getElementById("nombre-" + id).value;
 
-let formData = new FormData()
+    let formData = new FormData();
 
-formData.append("id",id)
-formData.append("nombre",nombre)
+    formData.append("id", id);
+    formData.append("nombre", nombre);
 
-await fetch(API+"/admin/cambiar_nombre",{
-method:"POST",
-body:formData
-})
+    await fetch(API + "/admin/cambiar_nombre", {
+        method:"POST",
+        body:formData
+    });
 
-cargarProductos()
+    cargarProductos();
+}
 
+async function cambiarCategoria(id){
+
+    let categoria = document.getElementById("categoria-" + id).value;
+
+    let formData = new FormData();
+
+    formData.append("id", id);
+    formData.append("categoria", categoria);
+
+    await fetch(API + "/admin/cambiar_categoria", {
+        method:"POST",
+        body:formData
+    });
+
+    cargarProductos();
+}
+
+async function cambiarDescripcion(id){
+
+    let descripcion = document.getElementById("descripcion-" + id).value;
+
+    let formData = new FormData();
+
+    formData.append("id", id);
+    formData.append("descripcion", descripcion);
+
+    await fetch(API + "/admin/cambiar_descripcion", {
+        method:"POST",
+        body:formData
+    });
+
+    cargarProductos();
 }
 
 async function agregarProducto(){
 
-let nombre = document.getElementById("nombre").value
-let precio = document.getElementById("precio").value
-let stock = document.getElementById("stock").value
-let categoria = document.getElementById("categoria").value
-let descripcion = document.getElementById("descripcion").value
-let archivo = document.getElementById("imagen").files[0]
+    let nombre = document.getElementById("nombre").value;
+    let precio = document.getElementById("precio").value;
+    let stock = document.getElementById("stock").value;
+    let categoria = document.getElementById("categoria").value;
+    let descripcion = document.getElementById("descripcion").value;
+    let archivo = document.getElementById("imagen").files[0];
 
-let formData = new FormData()
+    if(!nombre || !precio || !stock || !categoria || !archivo){
+        alert("Completa nombre, precio, stock, categoría e imagen");
+        return;
+    }
 
-formData.append("nombre",nombre)
-formData.append("precio",precio)
-formData.append("stock",stock)
-formData.append("categoria",categoria)
-formData.append("descripcion",descripcion)
-formData.append("imagen",archivo)
+    let formData = new FormData();
 
-await fetch(API+"/admin/agregar",{
-method:"POST",
-body:formData
-})
+    formData.append("nombre", nombre);
+    formData.append("precio", precio);
+    formData.append("stock", stock);
+    formData.append("categoria", categoria);
+    formData.append("descripcion", descripcion);
+    formData.append("imagen", archivo);
 
-cargarProductos()
+    await fetch(API + "/admin/agregar", {
+        method:"POST",
+        body:formData
+    });
 
+    document.getElementById("nombre").value = "";
+    document.getElementById("precio").value = "";
+    document.getElementById("stock").value = "";
+    document.getElementById("categoria").value = "";
+    document.getElementById("descripcion").value = "";
+    document.getElementById("imagen").value = "";
+
+    cargarProductos();
 }
 
 async function eliminarProducto(id){
 
-await fetch(API+"/admin/eliminar/"+id,{
-method:"DELETE"
-})
+    const confirmar = confirm("¿Seguro que quieres eliminar este producto?");
 
-cargarProductos()
+    if(!confirmar){
+        return;
+    }
 
+    await fetch(API + "/admin/eliminar/" + id, {
+        method:"DELETE"
+    });
+
+    cargarProductos();
 }
 
 function cambiarImagen(id){
 
-let input = document.createElement("input")
-input.type = "file"
-input.accept = "image/*"
+    let input = document.createElement("input");
 
-input.onchange = async function(){
+    input.type = "file";
+    input.accept = "image/*";
 
-let archivo = input.files[0]
+    input.onchange = async function(){
 
-let formData = new FormData()
-formData.append("id",id)
-formData.append("imagen",archivo)
+        let archivo = input.files[0];
 
-await fetch(API+"/admin/cambiar_imagen",{
-method:"POST",
-body:formData
-})
+        if(!archivo){
+            return;
+        }
 
-cargarProductos()
+        let formData = new FormData();
 
-}
+        formData.append("id", id);
+        formData.append("imagen", archivo);
 
-input.click()
+        await fetch(API + "/admin/cambiar_imagen", {
+            method:"POST",
+            body:formData
+        });
 
+        cargarProductos();
+    };
+
+    input.click();
 }
 
 /* ===============================
-HISTORIAL ADMIN
+PEDIDOS ADMIN
 =============================== */
 
-async function cargarHistorial(){
+async function cargarPedidos(){
 
-let res = await fetch(API + "/admin/historial")
-let data = await res.json()
+    try{
 
-let tabla = document.getElementById("tablaHistorial")
-tabla.innerHTML=""
+        let res = await fetch(API + "/admin/pedidos");
 
-data.forEach(p=>{
+        if(!res.ok){
+            throw new Error("No se pudieron cargar los pedidos");
+        }
 
-tabla.innerHTML += `
-<tr>
+        let pedidos = await res.json();
 
-<td>${p.id}</td>
-<td>${p.usuario}</td>
-<td>${p.producto}</td>
-<td>${p.cantidad}</td>
-<td>${p.estado}</td>
+        let tabla = document.getElementById("tablaPedidos");
 
-<td>
+        tabla.innerHTML = "";
 
-<button class="btn btn-sm btn-success"
-onclick="cambiarEstado(${p.id},'entregado')">
-Entregado
-</button>
+        if(!pedidos.length){
 
-<button class="btn btn-sm btn-warning"
-onclick="cambiarEstado(${p.id},'pendiente')">
-Pendiente
-</button>
+            tabla.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center text-muted">
+                    No hay pedidos registrados.
+                </td>
+            </tr>
+            `;
 
-</td>
+            return;
+        }
 
-</tr>
-`
+        pedidos.forEach(pedido=>{
 
-})
+            const productos = (pedido.items || []).map(item=>{
+
+                return `
+                <div class="producto-item">
+                    <b>${item.cantidad} x ${limpiarTexto(item.nombre)}</b><br>
+                    <span>Precio: $${item.precio}</span><br>
+                    <span>Subtotal: $${item.subtotal}</span>
+                </div>
+                `;
+
+            }).join("");
+
+            tabla.innerHTML += `
+            <tr>
+
+                <td>
+                    <b>${pedido._id}</b>
+                </td>
+
+                <td>
+                    ${limpiarTexto(pedido.usuario)}
+                </td>
+
+                <td>
+                    ${productos}
+                </td>
+
+                <td>
+                    <b>$${pedido.total}</b>
+                </td>
+
+                <td>
+                    <span class="badge-estado ${claseEstado(pedido.estado)}">
+                        ${pedido.estado}
+                    </span>
+                </td>
+
+                <td>
+                    ${
+                        pedido.motivo_rechazo
+                        ? limpiarTexto(pedido.motivo_rechazo)
+                        : "-"
+                    }
+                </td>
+
+                <td style="min-width:230px;">
+
+                    <button class="btn btn-sm btn-warning mb-1"
+                    onclick="actualizarEstadoPedido('${pedido._id}', 'En preparación')">
+                        En preparación
+                    </button>
+
+                    <button class="btn btn-sm btn-primary mb-1"
+                    onclick="actualizarEstadoPedido('${pedido._id}', 'En camino')">
+                        En camino
+                    </button>
+
+                    <button class="btn btn-sm btn-success mb-1"
+                    onclick="actualizarEstadoPedido('${pedido._id}', 'Entregado')">
+                        Entregado
+                    </button>
+
+                    <button class="btn btn-sm btn-danger mb-1"
+                    onclick="rechazarPedido('${pedido._id}')">
+                        Rechazar
+                    </button>
+
+                </td>
+
+            </tr>
+            `;
+
+        });
+
+    }catch(error){
+
+        console.error(error);
+        alert("Error al cargar pedidos");
+
+    }
 
 }
 
-async function cambiarEstado(id,estado){
+async function actualizarEstadoPedido(id, estado){
 
-await fetch(API + "/admin/cambiar_estado",{
+    try{
 
-method:"POST",
+        let res = await fetch(API + "/admin/pedidos/" + id + "/estado", {
+            method:"PUT",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                estado:estado
+            })
+        });
 
-headers:{
-"Content-Type":"application/json"
-},
+        let data = await res.json();
 
-body:JSON.stringify({
-id:id,
-estado:estado
-})
+        if(!res.ok){
+            alert(data.detail || "No se pudo actualizar el pedido");
+            return;
+        }
 
-})
+        cargarPedidos();
 
-cargarHistorial()
+    }catch(error){
+
+        console.error(error);
+        alert("Error al actualizar pedido");
+
+    }
+
+}
+
+async function rechazarPedido(id){
+
+    const motivo = prompt("Escribe el motivo del rechazo:");
+
+    if(motivo === null){
+        return;
+    }
+
+    try{
+
+        let res = await fetch(API + "/admin/pedidos/" + id + "/estado", {
+            method:"PUT",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                estado:"Rechazado",
+                motivo_rechazo:motivo || "Compra rechazada por administración"
+            })
+        });
+
+        let data = await res.json();
+
+        if(!res.ok){
+            alert(data.detail || "No se pudo rechazar el pedido");
+            return;
+        }
+
+        cargarPedidos();
+
+    }catch(error){
+
+        console.error(error);
+        alert("Error al rechazar pedido");
+
+    }
 
 }
 
@@ -396,15 +706,15 @@ cargarHistorial()
 AUTO CARGA
 =============================== */
 
-cargarProductos()
-cargarHistorial()
+cargarProductos();
+cargarPedidos();
 
 setInterval(()=>{
 
-cargarProductos()
-cargarHistorial()
+    cargarProductos();
+    cargarPedidos();
 
-},10000)
+}, 10000);
 
 </script>
 

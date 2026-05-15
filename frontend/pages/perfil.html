@@ -6,6 +6,9 @@
 
 <title>Mi Perfil</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=DynaPuff:wght@400..700&family=Viga&display=swap" rel="stylesheet">
 <link href="../css/output.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -13,18 +16,22 @@
 body{
     background:#f8fafc;
 }
+
+.font-cherry { font-family: 'Cherry Bomb One', cursive; }
+.font-viga { font-family: 'Viga', sans-serif; }   
+.font-dynapuff { font-family: 'DynaPuff', cursive; }
 </style>
 
 </head>
 
-<body>
+<body class="font-viga text-green-400">
 
 <div class="flex min-h-screen">
 
     <!-- SIDEBAR -->
     <aside class="w-72 bg-white shadow-xl p-6">
 
-        <h1 class="text-3xl font-bold text-cyan-400 mb-10">
+        <h1 class="text-3xl font-bold text-cyan-400 mb-10 font-dynapuff">
             Mi Cuenta
         </h1>
 
@@ -46,8 +53,8 @@ body{
             </button>
 
             <button onclick="logout()"
-            class="w-full text-left p-3 rounded-xl bg-red-500 text-white hover:bg-red-600">
-                🚪 Cerrar sesión
+            class="w-full text-left p-3 rounded-xl bg-[#d26ae6] text-white hover:bg-[#5ee1e6]">
+                Cerrar sesión
             </button>
 
         </nav>
@@ -57,7 +64,7 @@ body{
     <!-- CONTENIDO -->
     <main class="flex-1 p-10">
         <div class="flex justify-end mb-6">
-            <button onclick="volverInicio()" class="w-12 h-12 rounded-full bg-white shadow-md text-2xl hover:bg-red-500 hover:text-white transition">
+            <button onclick="volverInicio()" class="w-12 h-12 rounded-full bg-white shadow-md text-2xl hover:bg-[#d26ae6] hover:text-gray-400 transition">
                 ✕
             </button>
         </div>
@@ -65,7 +72,7 @@ body{
         <!-- CUENTA -->
         <section id="cuenta">
 
-            <h2 class="text-4xl font-bold mb-8">
+            <h2 class="text-4xl font-bold mb-8 font-dynapuff text-[#d26ae6] ">
                 Información de cuenta
             </h2>
 
@@ -105,11 +112,11 @@ body{
         <!-- PEDIDOS -->
         <section id="pedidos" class="hidden">
 
-            <h2 class="text-4xl font-bold mb-8">
+            <h2 class="text-4xl font-bold mb-8 font-dynapuff text-[#d26ae6]">
                 Mis pedidos
             </h2>
 
-            <div id="lista-pedidos"
+            <div id="contenedor-pedidos-cliente"
             class="grid grid-cols-1 md:grid-cols-2 gap-6">
             </div>
 
@@ -118,7 +125,7 @@ body{
         <!-- SEGURIDAD -->
         <section id="seguridad" class="hidden">
 
-            <h2 class="text-4xl font-bold mb-8">
+            <h2 class="text-4xl font-bold mb-8 font-dynapuff text-[#d26ae6] ">
                 Seguridad
             </h2>
 
