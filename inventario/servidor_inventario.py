@@ -1,6 +1,10 @@
+from multiprocessing import context
+from urllib import request
+
 import grpc
 from concurrent import futures
 from threading import Lock
+from pymongo import ReturnDocument
 
 import inventario_pb2
 import inventario_pb2_grpc
@@ -63,44 +67,54 @@ class InventarioService(inventario_pb2_grpc.InventarioServiceServicer):
     # ===============================
     def DescontarStock(self, request, context):
 
+        cantidad = int(request.cantidad)
+        producto_id = int(request.id)
+
+        if cantidad <= 0:
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT,
+                "La cantidad debe ser mayor a 0"
+            )
+
         with lock:
 
-            producto = productos_collection.find_one({
-                "_id": request.id
-            })
+            producto_actualizado = productos_collection.find_one_and_update(
+                {
+                    "_id": producto_id,
+                    "stock": {
+                        "$gte": cantidad
+                    }
+                },
+                {
+                    "$inc": {
+                        "stock": -cantidad
+                    }
+                },
+                return_document=ReturnDocument.AFTER
+            )
 
-            if not producto:
-                context.abort(
-                    grpc.StatusCode.NOT_FOUND,
-                    "Producto no encontrado"
-                )
+            if not producto_actualizado:
 
-            stock_actual = int(producto.get("stock", 0))
-            precio_actual = float(producto.get("precio", 0))
+                producto = productos_collection.find_one({
+                    "_id": producto_id
+                })
 
-            if stock_actual < request.cantidad:
+                if not producto:
+                    context.abort(
+                        grpc.StatusCode.NOT_FOUND,
+                        "Producto no encontrado"
+                    )
 
                 context.abort(
                     grpc.StatusCode.FAILED_PRECONDITION,
                     "Stock insuficiente"
                 )
 
-            nuevo_stock = stock_actual - request.cantidad
-
-            productos_collection.update_one(
-                {"_id": request.id},
-                {
-                    "$set": {
-                        "stock": nuevo_stock
-                    }
-                }
-            )
-
             return inventario_pb2.StockResponse(
-                stock=nuevo_stock,
-                precio=precio_actual
+                stock=int(producto_actualizado.get("stock", 0)),
+                precio=float(producto_actualizado.get("precio", 0))
             )
-
+        
     # ===============================
     # ADMIN: ACTUALIZAR STOCK
     # ===============================

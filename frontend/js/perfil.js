@@ -12,7 +12,7 @@ onAuthStateChanged
 from
 "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
-const API = "http://26.145.132.10:8000";
+const API = window.location.origin;
 
 /* =========================
 PROTEGER PERFIL

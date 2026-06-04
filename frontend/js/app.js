@@ -195,7 +195,7 @@ async function refrescarProductos(){
 
 setInterval(()=>{cargarProductos()},5000);
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
 
     const selectOrden = document.getElementById("orden");
     const selectCategoria = document.getElementById("categoria");
@@ -950,12 +950,11 @@ async function validarCarritoConStockActual(){
 PAGO
 ============================== */
 
-window.mostrarPago = function () {
+window.mostrarPago = async function () {
 
     const user = auth.currentUser;
 
     if (!user) {
-
         Swal.fire({
             title: "Debes iniciar sesión",
             text: "Necesitas iniciar sesión para comprar",
@@ -963,7 +962,6 @@ window.mostrarPago = function () {
             confirmButtonText: "Ir al login",
             showCancelButton: true
         }).then((result) => {
-
             if (result.isConfirmed) {
                 window.location.href = "login.html";
             }
@@ -972,272 +970,65 @@ window.mostrarPago = function () {
         return;
     }
 
-    let carrito = obtenerCarrito();
+    const carritoValido = await validarCarritoConStockActual();
 
-    if (carrito.length === 0) {
-
-        Swal.fire(
-            "Carrito vacío"
-        );
-
+    if (!carritoValido) {
         return;
     }
 
-carrito = obtenerCarrito();
+    const carrito = obtenerCarrito();
 
-
-    const tarjetaSimulada = generarTarjetaSimulada();
-
-    Swal.fire({
-
-        title: "Pago Seguro",
-
-        width: 700,
-
-        html: `
-
-        <div class="space-y-5 text-left">
-
-            <!-- TARJETA VISUAL -->
-
-            <div class="bg-gradient-to-r from-cyan-400 to-blue-500 rounded-3xl p-6 text-white shadow-xl">
-
-                <div class="flex justify-between items-center mb-10">
-                    <h3 class="text-2xl font-bold">VISA</h3>
-                    <span class="text-sm">Pago simulado</span>
-                </div>
-
-                <p id="preview-numero"
-                class="text-2xl tracking-[4px] mb-6 font-bold">
-                **** **** **** ****
-                </p>
-
-                <div class="flex justify-between items-end">
-
-                    <div>
-                        <p class="text-xs opacity-80">Titular</p>
-                        <p id="preview-nombre"
-                        class="font-bold uppercase">
-                            NOMBRE COMPLETO
-                        </p>
-                    </div>
-
-                    <div>
-                        <p class="text-xs opacity-80">Expira</p>
-                        <p id="preview-fecha"
-                        class="font-bold">
-                            MM/AA
-                        </p>
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="bg-yellow-50 border border-yellow-300 rounded-2xl p-4 text-sm">
-            <p class="font-bold text-yellow-700 mb-2">
-            Tarjeta simulada para esta compra
-            </p>
-
-            <p><b>Número:</b> ${tarjetaSimulada.numero}</p>
-            <p><b>Fecha:</b> ${tarjetaSimulada.fecha}</p>
-            <p><b>CVV:</b> ${tarjetaSimulada.cvv}</p>
-
-            <p class="text-gray-500 mt-2">
-                Copia estos datos en los campos para aprobar el pago.
-            </p>
-        </div>
-
-            <!-- INPUTS -->
-
-            <input
-            id="titular"
-            class="swal2-input"
-            placeholder="Nombre del titular"
-            maxlength="30"
-            autocomplete="cc-name">
-
-            <input
-            id="tarjeta"
-            class="swal2-input"
-            placeholder="4242 4242 4242 4242"
-            maxlength="19"
-            inputmode="numeric"
-            autocomplete="cc-number">
-
-            <div class="flex gap-3">
-
-                <input
-                id="fecha"
-                class="swal2-input"
-                placeholder="MM/AA"
-                maxlength="5"
-                inputmode="numeric"
-                autocomplete="cc-exp">
-
-                <input
-                id="cvv"
-                class="swal2-input"
-                placeholder="CVV"
-                maxlength="3"
-                inputmode="numeric"
-                autocomplete="cc-csc">
-
-            </div>
-
-        </div>
-        `,
-
-        didOpen: () => {
-
-            const tarjeta = document.getElementById("tarjeta");
-            const titular = document.getElementById("titular");
-            const fecha = document.getElementById("fecha");
-
-            tarjeta.addEventListener("input", () => {
-
-                tarjeta.value = tarjeta.value
-                    .replace(/\D/g, '')
-                    .replace(/(.{4})/g, '$1 ')
-                    .trim();
-
-                document.getElementById("preview-numero")
-                    .innerText =
-                    tarjeta.value || "4242 4242 4242 4242";
-            });
-
-            titular.addEventListener("input", () => {
-
-                document.getElementById("preview-nombre")
-                    .innerText =
-                    titular.value.toUpperCase() || "NOMBRE COMPLETO";
-            });
-
-            fecha.addEventListener("input", () => {
-
-                fecha.value = fecha.value
-                    .replace(/\D/g, '')
-                    .replace(/(\d{2})(\d)/, '$1/$2');
-
-                document.getElementById("preview-fecha")
-                    .innerText =
-                    fecha.value || "08/29";
-            });
-        },
-
-        confirmButtonText: "Pagar",
-
-        showCancelButton: true,
-
-        preConfirm: () => {
-
-            const titular =
-                document.getElementById("titular").value.trim();
-
-            const tarjeta =
-                document.getElementById("tarjeta").value.replace(/\s/g, '');
-
-            const fecha =
-                document.getElementById("fecha").value;
-
-            const cvv =
-                document.getElementById("cvv").value;
-
-            // VALIDAR TITULAR
-
-            if (titular.length < 5) {
-
-                Swal.showValidationMessage(
-                    "Ingresa un nombre válido"
-                );
-
-                return false;
+    try {
+        Swal.fire({
+            title: "Conectando con Mercado Pago...",
+            text: "Te redirigiremos al pago seguro.",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
             }
+        });
 
-            // VALIDAR TARJETA
+        const respuesta = await fetch(API + "/mercadopago/crear-preferencia", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                usuario: user.email,
+                items: carrito.map(producto => ({
+                    id: producto.id,
+                    nombre: producto.nombre,
+                    precio: producto.precio,
+                    cantidad: producto.cantidad
+                }))
+            })
+        });
 
-            if (!/^\d{16}$/.test(tarjeta)) {
+        const data = await respuesta.json();
 
-                Swal.showValidationMessage(
-                    "La tarjeta debe tener 16 dígitos"
-                );
-
-                return false;
-            }
-
-            // VALIDAR FECHA
-
-            if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(fecha)) {
-
-                Swal.showValidationMessage(
-                    "Fecha inválida"
-                );
-
-                return false;
-            }
-
-            // VALIDAR CVV
-
-            if (!/^\d{3}$/.test(cvv)) {
-
-                Swal.showValidationMessage(
-                    "CVV inválido"
-                );
-
-                return false;
-            }
-            
-            if(tarjeta !== tarjetaSimulada.numeroLimpio){
-                
-                Swal.showValidationMessage(
-                    "Número de tarjeta incorrecto para esta compra"
-                 );
-                 return false;
-                }
-                
-                if(fecha !== tarjetaSimulada.fecha){
-                    Swal.showValidationMessage(
-                        "Fecha incorrecta para esta compra"
-                    );
-                    return false;
-                }
-                
-                if(cvv !== tarjetaSimulada.cvv){
-                    Swal.showValidationMessage(
-                        "CVV incorrecto para esta compra"
-                    );
-
-                    return false;
-                }
-                return {
-                titular,
-                tarjeta,
-                fecha,
-                cvv
-            };
-            
+        if (!respuesta.ok) {
+            throw new Error(data.detail || "No se pudo crear la preferencia");
         }
 
-    }).then(async (result) => {
+        localStorage.setItem("mp_pedido_id", data.pedido_id);
 
-        if (result.isConfirmed) {
+        const urlPago = data.init_point || data.sandbox_init_point;
 
-            Swal.fire({
-                title: "Procesando pago...",
-                text: "No cierres la ventana",
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            setTimeout(async () => {
-
-                await procesarPago();
-
-            }, 2000);
+        if (!urlPago) {
+            throw new Error("Mercado Pago no devolvió URL de pago");
         }
-    });
+
+        window.location.href = urlPago;
+
+    } catch (error) {
+        console.error("Error Mercado Pago:", error);
+
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: error.message || "No se pudo iniciar el pago con Mercado Pago"
+        });
+    }
 };
 
 /* ==============================
@@ -1372,6 +1163,71 @@ console.log("Compra realizada:", compra);
     }
 }
 
+window.addEventListener("DOMContentLoaded", async () => {
+
+    const params = new URLSearchParams(window.location.search);
+    const estadoMP = params.get("mp");
+
+    if (!estadoMP) {
+        return;
+    }
+
+    const paymentId = params.get("payment_id");
+    const externalReference = params.get("external_reference");
+
+    try {
+        if (paymentId) {
+            await fetch(
+                API +
+                "/mercadopago/confirmar-retorno?payment_id=" +
+                encodeURIComponent(paymentId) +
+                "&external_reference=" +
+                encodeURIComponent(externalReference || "")
+            );
+        }
+    } catch (error) {
+        console.error("Error confirmando retorno de Mercado Pago:", error);
+    }
+
+    if (estadoMP === "success") {
+
+        localStorage.removeItem("carrito");
+        localStorage.removeItem("mp_pedido_id");
+
+        cargarCarrito();
+        
+        Swal.fire({
+            icon: "success",
+            title: "Pago recibido",
+            text: "Tu pago fue aprobado. Revisa tu historial."
+        });
+
+        await refrescarProductos();
+
+    } else if (estadoMP === "pending") {
+
+        Swal.fire({
+            icon: "info",
+            title: "Pago pendiente",
+            text: "Mercado Pago todavía está procesando tu pago."
+        });
+
+    } else if (estadoMP === "failure") {
+
+        Swal.fire({
+            icon: "error",
+            title: "Pago no completado",
+            text: "No se realizó el cobro. Tu carrito sigue disponible."
+        });
+    }
+
+    window.history.replaceState(
+        {},
+        document.title,
+        window.location.pathname
+    );
+});
+
 /* ==============================
 HISTORIAL
 ============================== */
@@ -1381,7 +1237,10 @@ async function cargarPedidosCliente() {
 
     if (!contenedor) return;
 
-    const usuario = localStorage.getItem("usuario") || "cliente_demo";
+    const usuario = auth.currentUser?.email;
+    if (!usuario) {
+        return;
+    }
 
     try {
         const respuesta = await fetch(API + "/pedidos/cliente/" + encodeURIComponent(usuario));
@@ -1469,6 +1328,7 @@ function obtenerPorcentajeEstado(estado) {
     if (estado === "En camino") return 66;
     if (estado === "Entregado") return 100;
     if (estado === "Rechazado") return 100;
+    if (estado === "Pendiente de pago") return 0;
     return 0;
 }
 
@@ -1477,6 +1337,7 @@ function obtenerClaseEstado(estado) {
     if (estado === "En camino") return "bg-blue-100 text-blue-700";
     if (estado === "Entregado") return "bg-green-100 text-green-700";
     if (estado === "Rechazado") return "bg-red-100 text-red-700";
+    if (estado === "Pendiente de pago") return "bg-gray-100 text-gray-700";
     return "bg-gray-100 text-gray-700";
 }
 
